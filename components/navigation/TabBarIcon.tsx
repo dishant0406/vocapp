@@ -1,9 +1,18 @@
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
+// Importing HugeIcons instead of Expo vector icons
+import { HugeiconsIcon } from "@hugeicons/react-native";
+import { type ComponentProps } from "react";
 
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { type IconProps } from '@expo/vector-icons/build/createIconSet';
-import { type ComponentProps } from 'react';
-
-export function TabBarIcon({ style, ...rest }: IconProps<ComponentProps<typeof Ionicons>['name']>) {
-  return <Ionicons size={28} style={[{ marginBottom: -3 }, style]} {...rest} />;
+export function TabBarIcon({
+  style,
+  icon,
+  color,
+}: ComponentProps<typeof HugeiconsIcon>) {
+  return (
+    <HugeiconsIcon
+      size={28}
+      style={[{ marginBottom: -3 }, style]}
+      icon={icon}
+      color={color}
+    />
+  );
 }

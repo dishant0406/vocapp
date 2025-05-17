@@ -1,37 +1,58 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import React from "react";
 
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Tabs } from "expo-router";
+
+import { TabBarIcon } from "@/components/navigation/TabBarIcon";
+
+import { CloudDownloadIcon, Home11Icon } from "@hugeicons/core-free-icons";
+
+import { makeStyles, useTheme } from "@/utils/theme/useTheme";
+import { ViewStyle } from "react-native";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { theme } = useTheme();
+  const styles = madeStyles(theme);
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: theme.colors.text,
         headerShown: false,
-      }}>
+        tabBarStyle: styles.tabBar,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: "",
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+            <TabBarIcon color={color} icon={Home11Icon} />
           ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="download"
         options={{
-          title: 'Explore',
+          title: "",
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
+            <TabBarIcon color={color} icon={CloudDownloadIcon} />
           ),
         }}
       />
     </Tabs>
   );
 }
+
+const madeStyles = makeStyles((theme) => ({
+  tabBar: {
+    backgroundColor: theme.colors.tint,
+    borderTopLeftRadius: theme.vw(10),
+    borderTopRightRadius: theme.vw(10),
+    paddingTop: theme.vh(1.5),
+    height: theme.vh(12),
+    borderRightColor: theme.colors.tint,
+    borderLeftColor: theme.colors.tint,
+    borderTopColor: theme.colors.tint,
+    borderWidth: 1,
+  } as ViewStyle,
+}));
