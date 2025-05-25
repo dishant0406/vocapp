@@ -53,6 +53,7 @@ const madeStyles = makeStyles((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: theme.vw(4),
+    marginBottom: theme.vh(2),
   } as ViewStyle,
   searchIcon: {
     fontSize: theme.vw(6),

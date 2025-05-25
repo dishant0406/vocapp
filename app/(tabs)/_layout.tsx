@@ -54,5 +54,6 @@ const madeStyles = makeStyles((theme) => ({
     borderLeftColor: theme.colors.tint,
     borderTopColor: theme.colors.tint,
     borderWidth: 1,
+    position: "absolute",
   } as ViewStyle,
 }));

@@ -1,12 +1,15 @@
 import Duration from "@/components/Reusables/Duration";
 import EpisodesSheet from "@/components/Reusables/EpisodesSheet";
 import IconButton from "@/components/Reusables/IconButton";
-import { ALL_PODCASTS } from "@/utils/constants";
+import Loader from "@/components/Reusables/Loader";
+import handleApiCall from "@/utils/api/apiHandler";
+import { getPodcastById } from "@/utils/api/calls";
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
+import { Podcast } from "@/utils/types/podcast";
 import { ArrowLeft01Icon, Bookmark01Icon } from "@hugeicons/core-free-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   ImageStyle,
@@ -16,25 +19,33 @@ import {
   ViewStyle,
 } from "react-native";
 
-const Podcast: React.FC = () => {
+const SinglePodcast: React.FC = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { theme } = useTheme();
   const styles = madeStyles(theme);
+  const [podcast, setPodcast] = useState<Podcast | null>(null);
 
-  const podcast = ALL_PODCASTS.find((podcast) => podcast.id === id);
+  useEffect(() => {
+    (async () => {
+      handleApiCall(getPodcastById, [id], {
+        onSuccess: (data) => {
+          setPodcast(data);
+        },
+        onError: (error) => {
+          console.error("Error fetching podcast:", error);
+        },
+      });
+    })();
+  }, [id]);
 
   if (!podcast) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Podcast not found</Text>
-      </View>
-    );
+    return <Loader />;
   }
 
   return (
     <View style={styles.container}>
-      <Image source={{ uri: podcast?.imageUrl }} style={styles.image} />
+      <Image source={{ uri: podcast?.coverImage }} style={styles.image} />
       <View style={styles.imageMask} />
 
       <IconButton
@@ -49,11 +60,11 @@ const Podcast: React.FC = () => {
         onPress={() => {}}
       />
 
-      <Text style={styles.title}>{podcast?.name}</Text>
+      <Text style={styles.title}>{podcast?.title}</Text>
       <View style={styles.durationContainer}>
-        <Duration duration={podcast?.duration} />
+        <Duration duration={podcast?.averageDuration} />
       </View>
-      <Text style={styles.desc}>
+      <Text numberOfLines={5} style={styles.desc}>
         {podcast?.description || "No description available."}
       </Text>
       <EpisodesSheet podcast={podcast} />
@@ -61,7 +72,7 @@ const Podcast: React.FC = () => {
   );
 };
 
-export default Podcast;
+export default SinglePodcast;
 
 const madeStyles = makeStyles((theme) => {
   return {
@@ -87,7 +98,7 @@ const madeStyles = makeStyles((theme) => {
       opacity: 0.2,
     } as ViewStyle,
     title: {
-      fontSize: theme.fontSizes.mediumLarge,
+      fontSize: theme.fontSizes.medium,
       color: theme.colors.text,
       fontWeight: theme.fontWeights.bold,
       textAlign: "center",

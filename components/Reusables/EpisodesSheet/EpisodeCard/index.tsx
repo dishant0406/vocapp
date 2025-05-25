@@ -1,5 +1,6 @@
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
+import { Episode } from "@/utils/types/podcast";
 import { Href, usePathname, useRouter } from "expo-router";
 import React from "react";
 import {
@@ -38,7 +39,7 @@ const EpisodeCard = ({ episode, imageUrl }: Props) => {
       />
       <View style={styles.contentContainer}>
         <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
-          {episode.name}
+          {episode.title}
         </Text>
         <Duration duration={episode.duration} />
         <Text style={styles.desc} numberOfLines={2} ellipsizeMode="tail">

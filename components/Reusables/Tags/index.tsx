@@ -1,31 +1,31 @@
 import Tag from "@/components/Micro/Tag";
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
-import React, { useState } from "react";
+import { Topic } from "@/utils/types/podcast";
+import React, { useEffect, useState } from "react";
 import { ScrollView, View, ViewStyle } from "react-native";
 
-const Tags = () => {
+type TagsProps = {
+  topics?: Topic[];
+};
+
+const Tags = ({ topics }: TagsProps) => {
   const { theme } = useTheme();
   const styles = madeStyles(theme);
 
-  const [tags, setTags] = useState([
-    { title: "All", selected: true },
-    { title: "Technology", selected: false },
-    { title: "Business", selected: false },
-    { title: "Health", selected: false },
-    { title: "Science", selected: false },
-    { title: "Education", selected: false },
-    { title: "Entertainment", selected: false },
-    { title: "Sports", selected: false },
-    { title: "Music", selected: false },
-    { title: "News", selected: false },
-    { title: "Comedy", selected: false },
-    { title: "History", selected: false },
-    { title: "Fiction", selected: false },
-    { title: "True Crime", selected: false },
-    { title: "Self-Help", selected: false },
-    { title: "Society & Culture", selected: false },
-  ]);
+  const [tags, setTags] = useState<{ title: string; selected: boolean }[]>([]);
+
+  useEffect(() => {
+    if (topics && topics.length > 0) {
+      const initialTags = topics.map((topic, index) => ({
+        title: topic.name,
+        selected: false, // Select the first topic by default
+      }));
+      setTags([{ title: "All", selected: true }, ...initialTags]);
+    } else {
+      setTags([]);
+    }
+  }, [topics]);
 
   const handleTagPress = (index: number) => {
     const updatedTags = tags.map((tag, i) => ({
@@ -64,6 +64,7 @@ const madeStyles = makeStyles((theme) => ({
   scrollContainer: {
     paddingLeft: theme.vw(4),
     paddingVertical: theme.vh(4),
+    paddingTop: theme.vh(2),
   } as ViewStyle,
 }));
 

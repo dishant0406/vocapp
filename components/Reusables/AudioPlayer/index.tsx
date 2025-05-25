@@ -1,3 +1,7 @@
+import {
+  useAudioPlayerControls,
+  useAudioPlayerState,
+} from "@/utils/hooks/audioEvents";
 import { makeStyles, useTheme } from "@/utils/theme/useTheme";
 import {
   GoBackward10SecIcon,
@@ -9,35 +13,16 @@ import {
   VolumeMute02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
-import { useAudioPlayer } from "@simform_solutions/react-native-audio-waveform";
-import * as FileSystem from "expo-file-system";
-import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useState,
-} from "react";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import TrackPlayer, {
-  AppKilledPlaybackBehavior,
-  Capability,
-  Event,
-  State,
-  Track,
-  usePlaybackState,
-  useProgress,
-  useTrackPlayerEvents,
-} from "react-native-track-player";
+import React, { forwardRef, useEffect, useImperativeHandle } from "react";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import Waveform from "./WaveForm";
 
 type AudioPlayerProps = {
+  id: string;
   url: string;
+  title?: string;
+  artist?: string;
+  coverImage?: string;
   onPlayStateChange?: (isPlaying: boolean) => void;
 };
 
@@ -51,71 +36,27 @@ const formatTime = (sec: number) => {
   return `${min}:${s < 10 ? "0" : ""}${s}`;
 };
 
-let isPlayerReady = false;
-
-const setupPlayer = async (fileUri: string) => {
-  // Try to check if player is already initialized
-  try {
-    // Throws if setupPlayer already called
-    await TrackPlayer.setupPlayer({
-      autoHandleInterruptions: true,
-    });
-  } catch (error: any) {
-    // If error message indicates already initialized, ignore it
-    if (
-      typeof error?.message === "string" &&
-      error.message.includes("already been initialized")
-    ) {
-      // Player is already initialized, just continue
-    } else {
-      // Unknown error
-      console.error("Error setting up track player:", error);
-    }
-  }
-
-  await TrackPlayer.updateOptions({
-    android: {
-      appKilledPlaybackBehavior:
-        AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
-    },
-    capabilities: [Capability.Play, Capability.Pause, Capability.SeekTo],
-    compactCapabilities: [Capability.Play, Capability.Pause],
-    progressUpdateEventInterval: 1,
-  });
-
-  await TrackPlayer.reset();
-  await TrackPlayer.add({
-    id: "trackId",
-    url: fileUri,
-    title: "Audio",
-    artist: "",
-  } as Track);
-};
-
-const downloadFileToCache = async (url: string): Promise<string> => {
-  const filename = url.split("/").pop() || `audio-${Date.now()}.mp3`;
-  const fileUri = FileSystem.cacheDirectory + filename;
-  const fileInfo = await FileSystem.getInfoAsync(fileUri);
-
-  if (!fileInfo.exists) {
-    const { uri } = await FileSystem.downloadAsync(url, fileUri);
-    return uri;
-  }
-  return fileUri;
-};
-
 const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
-  ({ url, onPlayStateChange }, ref) => {
-    const [isMuted, setIsMuted] = useState(false);
-    const [isShuffled, setIsShuffled] = useState(false);
-    const [localPath, setLocalPath] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
-    const { extractWaveformData } = useAudioPlayer();
-    const [waveFormData, setWaveformData] = useState<number[][]>([]);
+  ({ id, url, title, artist, coverImage, onPlayStateChange }, ref) => {
+    const {
+      currentTrack,
+      isPlaying,
+      isLoading,
+      isMuted,
+      isShuffled,
+      position,
+      duration,
+    } = useAudioPlayerState();
 
-    const { state: playbackState } = usePlaybackState();
-    const progress = useProgress();
-    const isPlaying = playbackState === State.Playing;
+    const {
+      loadTrack,
+      updateTrackMetadata,
+      togglePlayPause,
+      seekBy,
+      toggleMute,
+      toggleShuffle,
+      seekTo,
+    } = useAudioPlayerControls();
 
     const { theme } = useTheme();
     const styles = madeStyles(theme);
@@ -129,6 +70,28 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
       [isPlaying]
     );
 
+    // Load track only when URL changes (not when title/artist changes)
+    useEffect(() => {
+      if (url && (!currentTrack || currentTrack.url !== url)) {
+        loadTrack(id, url, title, artist, coverImage);
+      }
+    }, [url, currentTrack?.url, loadTrack]);
+
+    // Update track metadata if title/artist changes for same URL
+    useEffect(() => {
+      if (currentTrack && currentTrack.url === url) {
+        // Only update if title or artist actually changed
+        if (
+          (title && title !== currentTrack.title) ||
+          (artist && artist !== currentTrack.artist) ||
+          (coverImage && coverImage !== currentTrack.coverImage) ||
+          (id && id !== currentTrack.id)
+        ) {
+          updateTrackMetadata(id, title, artist, coverImage);
+        }
+      }
+    }, [title, artist, currentTrack, id, url, updateTrackMetadata, coverImage]);
+
     // Inform parent of play state changes
     useEffect(() => {
       if (onPlayStateChange) {
@@ -136,98 +99,8 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
       }
     }, [isPlaying, onPlayStateChange]);
 
-    useTrackPlayerEvents(
-      [Event.PlaybackState, Event.PlaybackError],
-      (event) => {
-        if (event.type === Event.PlaybackError) {
-          console.error("An error occurred while playing:", event.message);
-        }
-      }
-    );
-
-    useEffect(() => {
-      let isMounted = true;
-      setLoading(true);
-
-      const setupAudio = async () => {
-        try {
-          const localFilePath = await downloadFileToCache(url);
-          if (isMounted) {
-            setLocalPath(localFilePath);
-            await setupPlayer(localFilePath);
-            const waveForm = await extractWaveformData({
-              path: localFilePath,
-              playerKey: localFilePath,
-              noOfSamples: 100,
-            });
-            setWaveformData(waveForm);
-            setLoading(false);
-          }
-        } catch (e) {
-          console.error("Error setting up audio:", e);
-          if (isMounted) {
-            setLoading(false);
-            setLocalPath(null);
-          }
-        }
-      };
-
-      setupAudio();
-
-      return () => {
-        isMounted = false;
-      };
-    }, [url]);
-
-    useEffect(() => {
-      return () => {
-        const cleanup = async () => {
-          try {
-            if (isPlayerReady) {
-              await TrackPlayer.pause();
-              await TrackPlayer.reset();
-            }
-          } catch (error) {
-            console.error("Error during cleanup:", error);
-          }
-        };
-        cleanup();
-      };
-    }, []);
-
-    const onPlayPause = async () => {
-      try {
-        if (playbackState === State.Playing) {
-          await TrackPlayer.pause();
-        } else {
-          await TrackPlayer.play();
-        }
-      } catch (error) {
-        console.error("Error during play/pause:", error);
-      }
-    };
-
-    const onMute = async () => {
-      try {
-        setIsMuted((m) => !m);
-        await TrackPlayer.setVolume(isMuted ? 1 : 0);
-      } catch (error) {
-        console.error("Error during mute toggle:", error);
-      }
-    };
-
-    const onSeek = async (seconds: number) => {
-      try {
-        let newPos = progress.position + seconds;
-        if (newPos < 0) newPos = 0;
-        if (newPos > progress.duration) newPos = progress.duration;
-        await TrackPlayer.seekTo(newPos);
-      } catch (error) {
-        console.error("Error during seek:", error);
-      }
-    };
-
-    if (loading || !localPath) {
+    // Show loading state
+    if (isLoading || !currentTrack) {
       return (
         <View
           style={[
@@ -247,35 +120,35 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
       <View style={styles.container}>
         {/* Top controls */}
         <View style={styles.topRow}>
-          <TouchableOpacity onPress={onMute}>
+          <TouchableOpacity onPress={toggleMute}>
             <HugeiconsIcon
               icon={isMuted ? VolumeMute02Icon : VolumeHighIcon}
               color={theme.colors.text}
               size={28}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onSeek(-10)}>
+          <TouchableOpacity onPress={() => seekBy(-10)}>
             <HugeiconsIcon
               icon={GoBackward10SecIcon}
               color={theme.colors.text}
               size={28}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={onPlayPause} style={styles.playButton}>
+          <TouchableOpacity onPress={togglePlayPause} style={styles.playButton}>
             <HugeiconsIcon
               icon={isPlaying ? PauseIcon : PlayIcon}
               color={theme.colors.text}
               size={48}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onSeek(10)}>
+          <TouchableOpacity onPress={() => seekBy(10)}>
             <HugeiconsIcon
               icon={GoForward10SecIcon}
               color={theme.colors.text}
               size={28}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setIsShuffled((s) => !s)}>
+          <TouchableOpacity onPress={toggleShuffle}>
             <HugeiconsIcon
               icon={ShuffleSquareIcon}
               color={
@@ -288,19 +161,17 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
 
         {/* Waveform & Time */}
         <View style={styles.waveformRow}>
-          <Text style={styles.timeText}>{formatTime(progress.position)}</Text>
+          <Text style={styles.timeText}>{formatTime(position)}</Text>
           <View style={styles.waveformContainer}>
             <Waveform
-              data={waveFormData?.[0] || []}
-              maxDuration={progress.duration}
-              currentProgress={progress.position}
+              data={currentTrack.waveformData?.[0] || []}
+              maxDuration={duration}
+              currentProgress={position}
               containerStyle={styles.waveformInner}
-              setPosition={(position) => {
-                TrackPlayer.seekTo(position);
-              }}
+              setPosition={seekTo}
             />
           </View>
-          <Text style={styles.timeText}>{formatTime(progress.duration)}</Text>
+          <Text style={styles.timeText}>{formatTime(duration)}</Text>
         </View>
       </View>
     );
@@ -353,12 +224,6 @@ const madeStyles = makeStyles((theme) => ({
     width: "100%",
     height: "100%",
     backgroundColor: "transparent",
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: theme.colors.background,
   },
 }));
 

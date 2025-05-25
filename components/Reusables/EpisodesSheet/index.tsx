@@ -1,5 +1,6 @@
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
+import { Podcast } from "@/utils/types/podcast";
 import React, { useEffect } from "react";
 import {
   Text,
@@ -58,7 +59,7 @@ const EpisodesSheet = ({ podcast }: Props) => {
         >
           {podcast.episodes.map((episode, index) => (
             <EpisodeCard
-              imageUrl={episode.imageUrl || podcast.imageUrl}
+              imageUrl={podcast.coverImage}
               key={index}
               episode={episode}
             />

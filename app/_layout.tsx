@@ -25,6 +25,7 @@ import { Toaster } from "sonner-native";
 
 import { ENV } from "@/constants/variables";
 import { apiClient } from "@/utils/api/client";
+import { useAudioEvents } from "@/utils/hooks/audioEvents";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -61,6 +62,8 @@ export default function RootLayout() {
     load();
   }, [loaded]);
 
+  useAudioEvents();
+
   if (!loaded) {
     return <></>;
   }
@@ -77,6 +80,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
+
         <Toaster
           theme="system"
           style={{

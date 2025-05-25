@@ -1,33 +1,121 @@
 import AudioPlayer from "@/components/Reusables/AudioPlayer";
 import Disk from "@/components/Reusables/Disk";
 import IconButton from "@/components/Reusables/IconButton";
-import { ALL_PODCASTS } from "@/utils/constants";
+import Loader from "@/components/Reusables/Loader";
+import handleApiCall from "@/utils/api/apiHandler";
+import { getPodcastById } from "@/utils/api/calls";
 import { makeStyles, useTheme } from "@/utils/theme/useTheme";
+import { Podcast } from "@/utils/types/podcast";
 import { ArrowLeft01Icon, CloudDownloadIcon } from "@hugeicons/core-free-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { SafeAreaView, Text, TextStyle, View, ViewStyle } from "react-native";
 
 const EpisodePlay = () => {
   const { theme } = useTheme();
   const styles = madeStyles(theme);
-  const { id, episode } = useLocalSearchParams<{
+  const params = useLocalSearchParams<{
     id: string;
     episode: string;
   }>();
-  const podcast = ALL_PODCASTS.find((podcast) => podcast.id === id);
-  const episodeData = podcast?.episodes.find((ep) => ep.id === episode);
-  const [isPlaying, setIsPlaying] = useState(false);
 
-  if (!podcast || !episodeData) {
-    return <></>;
+  // Convert to string and memoize to prevent unnecessary re-renders
+  const podcastId = useMemo(
+    () => (Array.isArray(params.id) ? params.id[0] : params.id),
+    [params.id]
+  );
+  const episodeId = useMemo(
+    () => (Array.isArray(params.episode) ? params.episode[0] : params.episode),
+    [params.episode]
+  );
+
+  const [podcast, setPodcast] = useState<Podcast | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  // Memoize the API call function to prevent recreating it on every render
+  const fetchPodcast = useCallback(async (id: string) => {
+    if (!id) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await handleApiCall(getPodcastById, [id], {
+        onSuccess: (data) => {
+          setPodcast(data);
+          setLoading(false);
+        },
+        onError: (error) => {
+          console.error("Error fetching podcast:", error);
+          setError("Failed to load podcast");
+          setLoading(false);
+        },
+      });
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      setError("An unexpected error occurred");
+      setLoading(false);
+    }
+  }, []);
+
+  // Use podcastId as dependency instead of the entire params object
+  useEffect(() => {
+    if (podcastId) {
+      fetchPodcast(podcastId);
+    }
+  }, [podcastId, fetchPodcast]);
+
+  // Memoize episode data to prevent unnecessary recalculations
+  const episodeData = useMemo(() => {
+    if (!podcast || !episodeId) return null;
+    return podcast.episodes.find((ep) => ep.id === episodeId);
+  }, [podcast, episodeId]);
+
+  // Handle loading and error states
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Loader />
+      </SafeAreaView>
+    );
   }
 
-  const IMAGE = podcast?.imageUrl;
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <IconButton
+          icon={ArrowLeft01Icon}
+          position="leftButton"
+          onPress={() => router.back()}
+        />
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
-  const router = useRouter();
+  if (!podcast || !episodeData) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <IconButton
+          icon={ArrowLeft01Icon}
+          position="leftButton"
+          onPress={() => router.back()}
+        />
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Episode not found</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const IMAGE = podcast?.coverImage;
+
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.container}>
       <IconButton
         icon={ArrowLeft01Icon}
         position="leftButton"
@@ -36,15 +124,19 @@ const EpisodePlay = () => {
       <IconButton
         icon={CloudDownloadIcon}
         position="rightButton"
-        onPress={() => {}}
+        onPress={() => {
+          // Add download functionality here
+        }}
       />
       <View style={styles.diskContainer}>
-        <Disk isPlaying={isPlaying} image={IMAGE} />
+        <Disk isPlaying={false} image={IMAGE} />
       </View>
-      <Text style={styles.title}>{episodeData.name}</Text>
+      <Text style={styles.title}>{episodeData.title}</Text>
       <AudioPlayer
-        onPlayStateChange={setIsPlaying}
-        url="https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.mp3"
+        id={`${podcastId}::${episodeId}`}
+        coverImage={IMAGE}
+        title={episodeData.title}
+        url={episodeData.audioUrl}
       />
     </SafeAreaView>
   );
@@ -52,6 +144,10 @@ const EpisodePlay = () => {
 
 const madeStyles = makeStyles((theme) => {
   return {
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    } as ViewStyle,
     diskContainer: {
       width: theme.vw(100),
       marginTop: theme.vh(8),
@@ -59,13 +155,25 @@ const madeStyles = makeStyles((theme) => {
       justifyContent: "center",
     } as ViewStyle,
     title: {
-      fontSize: theme.fontSizes.mediumLarge,
+      fontSize: theme.fontSizes.medium,
       color: theme.colors.text,
       fontWeight: theme.fontWeights.bold,
       textAlign: "center",
       marginTop: theme.vh(3),
       paddingHorizontal: theme.vw(10),
       fontFamily: theme.fontFamily.bold,
+    } as TextStyle,
+    errorContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: theme.vw(10),
+    } as ViewStyle,
+    errorText: {
+      fontSize: theme.fontSizes.medium,
+      color: theme.colors.text,
+      textAlign: "center",
+      fontFamily: theme.fontFamily.regular,
     } as TextStyle,
   };
 });

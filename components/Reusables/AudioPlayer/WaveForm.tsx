@@ -146,6 +146,8 @@ const Waveform: React.FC<WaveformProps> = ({
     },
   });
 
+  console.log("waveform rerender");
+
   return (
     <View
       style={[

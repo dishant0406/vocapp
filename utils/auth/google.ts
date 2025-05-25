@@ -1,6 +1,8 @@
 import { ENV } from "@/constants/variables";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { Router } from "expo-router";
+import SuperTokens from "supertokens-react-native";
+import { apiClient } from "../api/client";
 
 export const performGoogleSignIn = async (router: Router): Promise<boolean> => {
   GoogleSignin.configure({
@@ -37,6 +39,7 @@ export const performGoogleSignIn = async (router: Router): Promise<boolean> => {
       );
     }
 
+    SuperTokens.addAxiosInterceptors(apiClient);
     router.replace("/(tabs)");
     return true;
   } catch (e) {

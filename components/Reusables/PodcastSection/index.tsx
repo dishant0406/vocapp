@@ -1,5 +1,6 @@
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
+import { Podcast } from "@/utils/types/podcast";
 import { Link } from "expo-router";
 import React from "react";
 import { Text, TextStyle, View, ViewStyle } from "react-native";
@@ -15,6 +16,7 @@ const PodcastSection = (props: Props) => {
   const { title, podcasts } = props;
   const { theme } = useTheme();
   const styles = madeStyles(theme);
+
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
@@ -33,9 +35,9 @@ const PodcastSection = (props: Props) => {
             <Cover
               id={podcast.id}
               key={index}
-              imageUrl={podcast.imageUrl}
-              title={podcast.name}
-              duration={podcast.duration}
+              imageUrl={podcast.coverImage}
+              title={podcast.title}
+              duration={podcast.averageDuration}
             />
           ))}
         </ScrollView>
