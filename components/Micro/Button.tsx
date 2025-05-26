@@ -27,6 +27,7 @@ interface ButtonProps {
   style?: ViewStyle;
   fullWidth?: boolean;
   disabled?: boolean;
+  textStyle?: TextStyle;
 }
 
 const Button = forwardRef<
@@ -42,6 +43,7 @@ const Button = forwardRef<
       style,
       fullWidth = false,
       disabled = false,
+      textStyle = {},
     },
     ref
   ) => {
@@ -109,7 +111,13 @@ const Button = forwardRef<
         onPressOut={() => !disabled && setIsPressed(false)}
         disabled={disabled}
       >
-        <Text style={[styles.text, getTextVariantStyle(variant, disabled)]}>
+        <Text
+          style={[
+            styles.text,
+            getTextVariantStyle(variant, disabled),
+            textStyle,
+          ]}
+        >
           {children}
         </Text>
       </TouchableOpacity>
@@ -168,8 +176,7 @@ const makeStyles = (theme: CustomTheme) =>
       color: theme.colors.primary,
     },
     disabledButtonVariant: {
-      backgroundColor: theme.colors.muted,
-      borderColor: theme.colors.muted,
+      opacity: 0.7,
     },
     disabledTextVariant: {
       color: theme.colors.mutedForeground,

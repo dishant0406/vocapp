@@ -30,6 +30,8 @@ const Cover = (props: Props) => {
 
   const router = useRouter();
 
+  const blurHash = "LEHV6nWB2yk8pyo0adR*.7kCMdnj";
+
   return (
     <TouchableOpacity
       onPress={() => router.push(`/podcast/${props.id}`)}

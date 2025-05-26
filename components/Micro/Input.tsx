@@ -2,10 +2,14 @@ import { CustomTheme } from "@/utils/theme/theme";
 import { useTheme } from "@/utils/theme/useTheme";
 import React, { forwardRef } from "react";
 import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
   TextStyle,
+  TouchableWithoutFeedback,
   View,
   ViewStyle,
 } from "react-native";
@@ -18,9 +22,10 @@ interface InputProps extends React.ComponentProps<typeof TextInput> {
   suffix?: React.ReactNode;
   containerStyle?: ViewStyle;
   inputContainerStyle?: ViewStyle;
-  inputStyle?: TextStyle; // Changed from ViewStyle to TextStyle
+  inputStyle?: TextStyle;
   labelStyle?: TextStyle;
   errorStyle?: TextStyle;
+  keyboardAvoidingEnabled?: boolean; // New prop to control keyboard avoiding behavior
 }
 
 const Input = forwardRef<TextInput, InputProps>(
@@ -35,6 +40,7 @@ const Input = forwardRef<TextInput, InputProps>(
       inputStyle,
       labelStyle,
       errorStyle,
+      keyboardAvoidingEnabled = true,
       ...props
     },
     ref
@@ -42,7 +48,7 @@ const Input = forwardRef<TextInput, InputProps>(
     const { theme } = useTheme();
     const styles = makeStyles(theme);
 
-    return (
+    const InputComponent = (
       <View style={[styles.container, containerStyle]}>
         {label && <Text style={[styles.label, labelStyle]}>{label}</Text>}
         <View style={[styles.inputContainer, inputContainerStyle]}>
@@ -74,13 +80,37 @@ const Input = forwardRef<TextInput, InputProps>(
         {error && <Text style={[styles.error, errorStyle]}>{error}</Text>}
       </View>
     );
+
+    // Wrap with keyboard avoiding view if enabled
+    if (keyboardAvoidingEnabled) {
+      return (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.keyboardAvoidingView}
+          >
+            {InputComponent}
+          </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
+      );
+    }
+
+    // If keyboard avoiding is disabled, just wrap with TouchableWithoutFeedback for keyboard dismissal
+    return (
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View>{InputComponent}</View>
+      </TouchableWithoutFeedback>
+    );
   }
 );
 
 const makeStyles = (theme: CustomTheme) =>
   StyleSheet.create({
+    keyboardAvoidingView: {
+      width: "100%",
+    },
     container: {
-      width: "100%", // Make the container full width
+      width: "100%",
       marginBottom: vh(2),
     },
     label: {
@@ -90,26 +120,29 @@ const makeStyles = (theme: CustomTheme) =>
       marginBottom: vh(1),
     },
     inputContainer: {
-      width: "100%", // Ensure input container is full width
+      width: "100%",
       flexDirection: "row",
       alignItems: "center",
       borderWidth: 1,
       borderColor: theme.colors.input,
       borderRadius: vw(2),
       backgroundColor: theme.colors.background,
+      minHeight: vh(6), // Ensure consistent height
     },
     input: {
       flex: 1,
-      width: "100%", // Ensure input takes full width within its container
+      width: "100%",
       paddingHorizontal: vw(3),
       paddingVertical: vh(2),
       fontSize: vw(4),
       color: theme.colors.foreground,
+      minHeight: Platform.OS === "android" ? vh(6) : undefined, // Android specific fix
     },
     affixContainer: {
       paddingHorizontal: vw(3),
       justifyContent: "center",
       alignItems: "center",
+      minHeight: vh(6), // Match input container height
     },
     affixText: {
       fontSize: vw(4),

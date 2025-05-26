@@ -7,6 +7,7 @@ type Props = {
   title: string;
   onPress?: () => void;
   selected?: boolean;
+  style?: ViewStyle;
 };
 
 const Tag = (props: Props) => {
@@ -15,7 +16,14 @@ const Tag = (props: Props) => {
   const styles = madeStyles(theme, { selected });
 
   return (
-    <TouchableOpacity activeOpacity={0.7} onPress={onPress} style={styles.pill}>
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={onPress}
+      style={{
+        ...styles.pill,
+        ...props.style,
+      }}
+    >
       <Text style={styles.pillText}>{title}</Text>
     </TouchableOpacity>
   );

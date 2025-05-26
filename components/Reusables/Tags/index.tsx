@@ -1,38 +1,75 @@
 import Tag from "@/components/Micro/Tag";
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
-import { Topic } from "@/utils/types/podcast";
 import React, { useEffect, useState } from "react";
 import { ScrollView, View, ViewStyle } from "react-native";
 
-type TagsProps = {
-  topics?: Topic[];
+type TagItem = {
+  id: string | number;
+  value: string;
 };
 
-const Tags = ({ topics }: TagsProps) => {
+type TagsProps = {
+  items?: TagItem[];
+  selected?: string | number | null;
+  setSelected?: (id: string | number | null) => void;
+  includeAllOption?: boolean;
+  tagStyle?: ViewStyle;
+};
+
+const Tags = ({
+  items = [],
+  selected = null,
+  setSelected,
+  includeAllOption = true,
+  tagStyle = {},
+}: TagsProps) => {
   const { theme } = useTheme();
   const styles = madeStyles(theme);
 
-  const [tags, setTags] = useState<{ title: string; selected: boolean }[]>([]);
+  const [tags, setTags] = useState<
+    { id: string | number; value: string; selected: boolean }[]
+  >([]);
 
   useEffect(() => {
-    if (topics && topics.length > 0) {
-      const initialTags = topics.map((topic, index) => ({
-        title: topic.name,
-        selected: false, // Select the first topic by default
+    if (items.length > 0) {
+      const initialTags = items.map((item) => ({
+        id: item.id,
+        value: item.value,
+        selected: item.id === selected,
       }));
-      setTags([{ title: "All", selected: true }, ...initialTags]);
+
+      if (includeAllOption) {
+        setTags([
+          {
+            id: "all",
+            value: "All",
+            selected: selected === null || selected === "all",
+          },
+          ...initialTags,
+        ]);
+      } else {
+        setTags(initialTags);
+      }
     } else {
       setTags([]);
     }
-  }, [topics]);
+  }, [items, selected, includeAllOption]);
 
   const handleTagPress = (index: number) => {
-    const updatedTags = tags.map((tag, i) => ({
-      ...tag,
-      selected: i === index,
-    }));
-    setTags(updatedTags);
+    const selectedTag = tags[index];
+
+    if (setSelected) {
+      const newSelectedId = selectedTag.id === "all" ? null : selectedTag.id;
+      setSelected(newSelectedId);
+    } else {
+      // Fallback to internal state management if no setSelected prop
+      const updatedTags = tags.map((tag, i) => ({
+        ...tag,
+        selected: i === index,
+      }));
+      setTags(updatedTags);
+    }
   };
 
   return (
@@ -44,8 +81,9 @@ const Tags = ({ topics }: TagsProps) => {
       >
         {tags.map((tag, index) => (
           <Tag
-            key={index}
-            title={tag.title}
+            style={{ ...tagStyle }}
+            key={tag.id.toString()}
+            title={tag.value}
             onPress={() => handleTagPress(index)}
             selected={tag.selected}
           />
@@ -62,9 +100,7 @@ const madeStyles = makeStyles((theme) => ({
     gap: theme.vw(2),
   } as ViewStyle,
   scrollContainer: {
-    paddingLeft: theme.vw(4),
-    paddingVertical: theme.vh(4),
-    paddingTop: theme.vh(2),
+    paddingBottom: theme.vh(4),
   } as ViewStyle,
 }));
 

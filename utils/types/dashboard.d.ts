@@ -7,6 +7,7 @@ export type PodcastApiResponse = {
   isMultiEpisode: boolean;
   createdAt: string; // ISO 8601 date string
   updatedAt: string; // ISO 8601 date string
+  averageDuration?: number; // in seconds
 };
 
 export type PodcastWithPlayCountApiResponse = PodcastApiResponse & {

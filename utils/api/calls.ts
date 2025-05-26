@@ -11,3 +11,10 @@ export const getDashboardData = async () => {
 export const getPodcastById = async (id: string) => {
   return apiClient.get(`/podcasts/${id}`);
 };
+
+export const createPodcast = async (searchQuery: string, duration: string) => {
+  return apiClient.post("/podcasts", {
+    searchQuery,
+    duration,
+  });
+};
