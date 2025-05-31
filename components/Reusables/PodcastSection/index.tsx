@@ -1,7 +1,7 @@
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
 import { Podcast } from "@/utils/types/podcast";
-import { Link } from "expo-router";
+import { Href, Link } from "expo-router";
 import React from "react";
 import { Text, TextStyle, View, ViewStyle } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
@@ -10,6 +10,7 @@ import Cover from "../Cover";
 type Props = {
   title?: string;
   podcasts: Podcast[];
+  link?: string;
 };
 
 const PodcastSection = (props: Props) => {
@@ -21,7 +22,7 @@ const PodcastSection = (props: Props) => {
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{title || "Podcasts"}</Text>
-        <Link href={"/"} style={styles.linkText}>
+        <Link href={(props.link as Href) || "/"} style={styles.linkText}>
           See All
         </Link>
       </View>

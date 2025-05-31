@@ -1,14 +1,23 @@
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
-import { Mic01Icon, Search01Icon } from "@hugeicons/core-free-icons";
+import { Search01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
-import React from "react";
+import { usePathname, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import { TextStyle, View, ViewStyle } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 
 const Search = () => {
   const { theme } = useTheme();
   const styles = madeStyles(theme);
+  const [term, setTerm] = useState("");
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setTerm("");
+  }, [pathname]);
+
   return (
     <View style={styles.container}>
       <HugeiconsIcon
@@ -28,15 +37,22 @@ const Search = () => {
         selectionColor={theme.colors.text}
         underlineColorAndroid="transparent"
         clearButtonMode="never"
-        onSubmitEditing={() => {}}
-        onChangeText={() => {}}
-        onFocus={() => {}}
+        onSubmitEditing={() => {
+          if (term.trim()) {
+            router.push(
+              `/podcasts?sort=search&query=${encodeURIComponent(term)}`
+            );
+          }
+        }}
+        onChange={(e) => setTerm(e.nativeEvent.text)}
+        value={term}
+        returnKeyType="search"
       />
-      <HugeiconsIcon
+      {/* <HugeiconsIcon
         icon={Mic01Icon}
         color={theme.colors.mutedForeground}
         style={[styles.searchIcon, { marginLeft: theme.vw(2) }]}
-      />
+      /> */}
     </View>
   );
 };

@@ -104,7 +104,6 @@ const handleApiCall = async <T = any, TArgs extends any[] = any[]>(
         const parsedCache = JSON.parse(cachedItem);
         const now = new Date().getTime();
         if (!cache.ttl || now - parsedCache.timestamp < cache.ttl) {
-          console.log("Returning cached data for key:", cacheKey);
           const finalCachedData = transformResponse
             ? transformResponse(parsedCache.data)
             : parsedCache.data;
@@ -113,7 +112,6 @@ const handleApiCall = async <T = any, TArgs extends any[] = any[]>(
           // Or, if you want loading state for cache, adjust accordingly.
           return finalCachedData;
         } else {
-          console.log("Cache expired for key:", cacheKey);
           localStorage.removeItem(cacheKey); // Remove expired cache
         }
       }
@@ -225,7 +223,6 @@ const handleApiCall = async <T = any, TArgs extends any[] = any[]>(
                 timestamp: new Date().getTime(),
               };
               localStorage.setItem(cacheKey, JSON.stringify(itemToCache));
-              console.log("Data cached for key:", cacheKey);
             } catch (e) {
               console.warn("Cache storage failed:", e);
             }

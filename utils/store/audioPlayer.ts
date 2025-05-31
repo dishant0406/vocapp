@@ -139,8 +139,6 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
   ) => {
     const state = get();
 
-    console.log("Loading track:", url, title, artist, coverImage);
-
     // If same track is already loaded and ready, don't reload
     if (
       state.currentTrack?.url === url &&

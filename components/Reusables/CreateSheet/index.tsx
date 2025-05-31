@@ -7,6 +7,7 @@ import { makeStyles, useTheme } from "@/utils/theme/useTheme";
 import React, { ForwardedRef, forwardRef, useState } from "react";
 import {
   Keyboard,
+  KeyboardAvoidingView,
   StyleSheet,
   Text,
   TextStyle,
@@ -74,34 +75,38 @@ const CreateSheet = forwardRef(
         disableDragBeyondMinimumSnapPoint
         containerStyle={styles.sheetContainer}
       >
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Create your own podcast</Text>
-        </View>
-        <Input
-          readOnly={loading}
-          keyboardAvoidingEnabled={true}
-          placeholder="latest news, tech, or anything else"
-          label="Anything in mind?"
-          value={topic}
-          onChange={(e) => setTopic(e.nativeEvent.text)}
-        />
-        <Text style={styles.label}>Duration</Text>
-        <Tags
-          items={DURATION_OPTIONS}
-          tagStyle={styles.tag}
-          selected={selectedDuration}
-          setSelected={(value) => setSelectedDuration(value as string)}
-          includeAllOption={false}
-        />
-        <Button
-          style={styles.button}
-          disabled={!topic || !selectedDuration || loading}
-          textStyle={styles.label}
-          onPress={handleCreate}
-          variant="secondary"
-        >
-          {loading ? "Creating..." : "Create Podcast"}
-        </Button>
+        <KeyboardAvoidingView>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Create your own podcast</Text>
+          </View>
+          <Input
+            readOnly={loading}
+            keyboardAvoidingEnabled={true}
+            placeholder="latest news, tech, or anything else"
+            label="Anything in mind?"
+            value={topic}
+            onChange={(e) => setTopic(e.nativeEvent.text)}
+          />
+          <Text style={styles.label}>Duration</Text>
+          <Tags
+            items={DURATION_OPTIONS}
+            tagStyle={styles.tag}
+            selected={selectedDuration}
+            setSelected={(value) => setSelectedDuration(value as string)}
+            includeAllOption={false}
+            isMultiSelect={false} // Added
+          />
+          <Button
+            style={styles.button}
+            disabled={!topic || !selectedDuration || loading}
+            textStyle={styles.label}
+            onPress={handleCreate}
+            variant="secondary"
+            loading={loading}
+          >
+            Create Podcast
+          </Button>
+        </KeyboardAvoidingView>
       </ActionSheet>
     );
   }

@@ -47,7 +47,6 @@ export const useAudioEvents = () => {
           }
           break;
         case Event.PlaybackTrackChanged:
-          // console.log("Track changed:", event.nextTrack); // Example logging
           break;
       }
     }

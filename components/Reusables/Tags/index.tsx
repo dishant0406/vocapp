@@ -11,10 +11,13 @@ type TagItem = {
 
 type TagsProps = {
   items?: TagItem[];
-  selected?: string | number | null;
-  setSelected?: (id: string | number | null) => void;
+  selected?: string | number | (string | number)[] | null; // Modified
+  setSelected?: (
+    selection: string | number | (string | number)[] | null
+  ) => void; // Modified
   includeAllOption?: boolean;
   tagStyle?: ViewStyle;
+  isMultiSelect?: boolean; // Added
 };
 
 const Tags = ({
@@ -23,6 +26,7 @@ const Tags = ({
   setSelected,
   includeAllOption = true,
   tagStyle = {},
+  isMultiSelect = false, // Added default
 }: TagsProps) => {
   const { theme } = useTheme();
   const styles = madeStyles(theme);
@@ -36,7 +40,9 @@ const Tags = ({
       const initialTags = items.map((item) => ({
         id: item.id,
         value: item.value,
-        selected: item.id === selected,
+        selected: isMultiSelect
+          ? Array.isArray(selected) && selected.includes(item.id)
+          : item.id === selected,
       }));
 
       if (includeAllOption) {
@@ -44,7 +50,10 @@ const Tags = ({
           {
             id: "all",
             value: "All",
-            selected: selected === null || selected === "all",
+            selected: isMultiSelect
+              ? selected === null ||
+                (Array.isArray(selected) && selected.length === 0)
+              : selected === null || selected === "all",
           },
           ...initialTags,
         ]);
@@ -54,16 +63,53 @@ const Tags = ({
     } else {
       setTags([]);
     }
-  }, [items, selected, includeAllOption]);
+  }, [items, selected, includeAllOption, isMultiSelect]); // Added isMultiSelect to dependency array
 
   const handleTagPress = (index: number) => {
-    const selectedTag = tags[index];
+    const pressedTag = tags[index];
 
     if (setSelected) {
-      const newSelectedId = selectedTag.id === "all" ? null : selectedTag.id;
-      setSelected(newSelectedId);
+      if (isMultiSelect) {
+        if (pressedTag.id === "all") {
+          setSelected(null); // "All" selected, pass null
+        } else {
+          let currentSelectedArray: (string | number)[] = [];
+          // Initialize currentSelectedArray from selected prop, filtering out "all" if present
+          if (Array.isArray(selected)) {
+            currentSelectedArray = selected.filter((id) => id !== "all");
+          }
+          // if selected is not an array but also not null, it implies a single selection previously.
+          // For multi-select, we transition it to an array.
+          // However, this scenario should ideally be handled by ensuring `selected` prop type matches `isMultiSelect` mode.
+          // The effect hook already correctly initializes tags based on `selected` prop.
+
+          const tagIdIndex = currentSelectedArray.indexOf(pressedTag.id);
+
+          if (tagIdIndex > -1) {
+            // Tag was already selected
+            currentSelectedArray.splice(tagIdIndex, 1); // Deselect
+          } else {
+            // Tag was not selected
+            currentSelectedArray.push(pressedTag.id); // Select
+          }
+
+          // If after modification, the array is empty and "All" option is available, select "All"
+          if (currentSelectedArray.length === 0 && includeAllOption) {
+            setSelected(null);
+          } else {
+            setSelected(currentSelectedArray);
+          }
+        }
+      } else {
+        // Single select mode
+        const newSelectedId = pressedTag.id === "all" ? null : pressedTag.id;
+        setSelected(newSelectedId);
+      }
     } else {
       // Fallback to internal state management if no setSelected prop
+      // This part is for single-select by index and would need significant changes
+      // to support multi-select internal state. Assuming setSelected will be provided
+      // for the new multi-select use cases as per the prompt.
       const updatedTags = tags.map((tag, i) => ({
         ...tag,
         selected: i === index,

@@ -1,6 +1,7 @@
 import { Button } from "@/components/Micro/Button";
 import { AUTH_IMAGE_URL } from "@/constants/variables";
 import { performGoogleSignIn } from "@/utils/auth/google";
+import useUserStore from "@/utils/store/userStore";
 import { makeStyles, useTheme } from "@/utils/theme/useTheme";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
@@ -19,6 +20,7 @@ const Auth = () => {
   const { theme } = useTheme();
   const router = useRouter();
   const styles = madeStyles(theme);
+  const { fetchUserProfile } = useUserStore();
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
@@ -42,7 +44,7 @@ const Auth = () => {
             </Text>
           </View>
           <Button
-            onPress={() => performGoogleSignIn(router)}
+            onPress={() => performGoogleSignIn(router, fetchUserProfile)}
             style={styles.loginButton}
           >
             <Text style={styles.loginButtonText}>Sign In with Google</Text>

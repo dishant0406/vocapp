@@ -1,11 +1,14 @@
+import { LOADER_LOTTIE } from "@/utils/constants";
 import { CustomTheme } from "@/utils/theme/theme";
 import { useTheme } from "@/utils/theme/useTheme";
+import LottieView from "lottie-react-native";
 import React, { forwardRef, useState } from "react";
 import {
   StyleSheet,
   Text,
   TextStyle,
   TouchableOpacity,
+  View,
   ViewStyle,
 } from "react-native";
 import { vh, vw } from "react-native-expo-typescript-viewport-units";
@@ -28,6 +31,8 @@ interface ButtonProps {
   fullWidth?: boolean;
   disabled?: boolean;
   textStyle?: TextStyle;
+  loading?: boolean;
+  loadingText?: string;
 }
 
 const Button = forwardRef<
@@ -44,6 +49,8 @@ const Button = forwardRef<
       fullWidth = false,
       disabled = false,
       textStyle = {},
+      loading = false,
+      loadingText = "",
     },
     ref
   ) => {
@@ -111,15 +118,44 @@ const Button = forwardRef<
         onPressOut={() => !disabled && setIsPressed(false)}
         disabled={disabled}
       >
-        <Text
-          style={[
-            styles.text,
-            getTextVariantStyle(variant, disabled),
-            textStyle,
-          ]}
-        >
-          {children}
-        </Text>
+        {!loading && (
+          <Text
+            style={[
+              styles.text,
+              getTextVariantStyle(variant, disabled),
+              textStyle,
+            ]}
+          >
+            {children}
+          </Text>
+        )}
+
+        {loading && (
+          <View style={styles.loadingContainer}>
+            {loadingText && (
+              <Text
+                style={[
+                  styles.text,
+                  getTextVariantStyle(variant, disabled),
+                  textStyle,
+                ]}
+              >
+                {loadingText}
+              </Text>
+            )}
+            <LottieView
+              source={{
+                uri: LOADER_LOTTIE,
+              }}
+              autoPlay
+              loop
+              style={{
+                width: 100,
+                height: 100,
+              }}
+            />
+          </View>
+        )}
       </TouchableOpacity>
     );
   }
@@ -194,6 +230,11 @@ const makeStyles = (theme: CustomTheme) =>
       height: vh(5.5),
       paddingHorizontal: vw(8),
       borderRadius: vw(2),
+    },
+    loadingContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
     },
   });
 

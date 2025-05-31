@@ -1,10 +1,13 @@
 import { ENV } from "@/constants/variables";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { GoogleSignin, User } from "@react-native-google-signin/google-signin";
 import { Router } from "expo-router";
 import SuperTokens from "supertokens-react-native";
 import { apiClient } from "../api/client";
 
-export const performGoogleSignIn = async (router: Router): Promise<boolean> => {
+export const performGoogleSignIn = async (
+  router: Router,
+  fetchUserProfile: () => Promise<void>
+): Promise<boolean> => {
   GoogleSignin.configure({
     webClientId: ENV.GOOGLE_WEB_CLIENT_ID,
     iosClientId: ENV.GOOGLE_IOS_CLIENT_ID,
@@ -40,15 +43,26 @@ export const performGoogleSignIn = async (router: Router): Promise<boolean> => {
     }
 
     SuperTokens.addAxiosInterceptors(apiClient);
+    await fetchUserProfile();
     router.replace("/(tabs)");
     return true;
   } catch (e) {
     const error = await e;
-    console.log(
+    console.error(
       "Google sign in failed with error",
       JSON.stringify(error, null, 2)
     );
   }
 
   return false;
+};
+
+export const getCurrentUser = async (): Promise<User | null> => {
+  try {
+    const userInfo = await GoogleSignin.getCurrentUser();
+    return userInfo;
+  } catch (error) {
+    console.error("Failed to get Google user info:", error);
+    return null;
+  }
 };

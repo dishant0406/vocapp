@@ -1,11 +1,12 @@
+import PodcastTopicsView from "@/components/Features/PodcastTopicsView";
 import Loader from "@/components/Reusables/Loader";
 import MiniAudioPlayer from "@/components/Reusables/MiniPlayer";
 import PodcastSection from "@/components/Reusables/PodcastSection";
 import Search from "@/components/Reusables/Search";
-import Tags from "@/components/Reusables/Tags";
-import { signOut } from "@/utils/api/auth";
+import { USER_AVATAR_IMAGE } from "@/utils/constants";
 import { useAudioPlayerState } from "@/utils/hooks/audioEvents";
-import useDashboardStore from "@/utils/store/dashboardStore"; // Import the new store
+import useDashboardStore from "@/utils/store/dashboardStore";
+import useUserStore from "@/utils/store/userStore";
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
 import {
@@ -16,11 +17,10 @@ import {
 import {
   Episode as EpisodeModel,
   Podcast as PodcastModel,
-  Topic as TopicModel,
   User as UserModel,
 } from "@/utils/types/podcast";
 import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react"; // Import useCallback
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Image,
   ImageStyle,
@@ -37,59 +37,68 @@ import { ScrollView } from "react-native-gesture-handler";
 const HomeScreen = () => {
   const { theme } = useTheme();
   const { currentTrack } = useAudioPlayerState();
-  const { dashboardData, fetchDashboard } = useDashboardStore(); // Use the store
+  const { dashboardData, fetchDashboard } = useDashboardStore();
+  const { userProfile } = useUserStore();
 
   const styles = madeStyles(theme, {
     isPlaying: currentTrack?.url ? true : false,
   });
   const router = useRouter();
-  // const [data, setData] = useState<DashboardDataApiResponse | null>(null); // Remove this line
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false); // State for RefreshControl
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showTopicPodcasts, setShowTopicPodcasts] = useState(false); // New state
 
-  const transformToPodcastModel = (
-    podcast: PodcastApiResponse | PodcastWithPlayCountApiResponse
-  ): PodcastModel => {
-    const defaultUser: UserModel = {
-      id: "",
-      name: "",
-      email: "",
-      supertokensUserId: "",
-      accountType: "free",
-      podcastLimit: 0,
-      podcastsGenerated: 0,
-      createdAt: "",
-      updatedAt: "",
-    };
-    return {
-      ...podcast,
-      averageDuration: podcast.averageDuration || 0, // Default value, Cover component handles 0 or undefined
-      schedule: null,
-      episodes: [] as EpisodeModel[],
-      topics: [] as TopicModel[],
-      user: defaultUser,
-    };
-  };
+  const transformToPodcastModel = useCallback(
+    (
+      podcast: PodcastApiResponse | PodcastWithPlayCountApiResponse
+    ): PodcastModel => {
+      const defaultUser: UserModel = {
+        id: "",
+        name: "",
+        email: "",
+        supertokensUserId: "",
+        accountType: "free",
+        podcastLimit: 0,
+        podcastsGenerated: 0,
+        createdAt: "",
+        updatedAt: "",
+      };
+      return {
+        ...podcast,
+        averageDuration: podcast.averageDuration || 0,
+        schedule: null,
+        episodes: [] as EpisodeModel[],
+        topics: (podcast as any).topics || [], // Ensure topics are passed if available
+        user: defaultUser,
+        title:
+          (podcast as any).title || (podcast as any).name || "Untitled Podcast",
+        coverImage:
+          (podcast as any).coverImage || (podcast as any).imageUrl || "",
+        description: (podcast as any).description || "",
+        isMultiEpisode: (podcast as any).isMultiEpisode || false,
+        userId: (podcast as any).userId || "",
+        createdAt: (podcast as any).createdAt || new Date().toISOString(),
+        updatedAt: (podcast as any).updatedAt || new Date().toISOString(),
+      };
+    },
+    []
+  );
 
-  const transformToTopicModel = (topic: TopicApiResponse) => {
+  const transformToTopicModel = useCallback((topic: TopicApiResponse) => {
     return {
       id: topic.id,
       value: topic.name,
     };
-  };
+  }, []);
 
-  const handleSignout = async () => {
-    const data = await signOut();
-    if (data.status === "OK") {
-      router.replace("/auth");
-    }
+  const handleProfileClick = async () => {
+    router.push("/profile");
   };
 
   useEffect(() => {
-    fetchDashboard(); // Call fetchDashboard from the store
+    fetchDashboard();
   }, [fetchDashboard]);
 
-  const onRefresh = useCallback(async () => {
+  const onRefreshDashboard = useCallback(async () => {
     setIsRefreshing(true);
     await fetchDashboard();
     setIsRefreshing(false);
@@ -104,54 +113,65 @@ const HomeScreen = () => {
       <MiniAudioPlayer />
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Hey Dishant! 👋</Text>
+          <Text style={styles.title}>
+            Hey {userProfile?.name?.split(" ")?.[0]}! 👋
+          </Text>
           <Text style={styles.subtitle}>Listen to your favorite podcasts.</Text>
         </View>
-        <TouchableOpacity activeOpacity={0.7} onPress={handleSignout}>
+        <TouchableOpacity activeOpacity={0.7} onPress={handleProfileClick}>
           <Image
             source={{
-              uri: "https://api.dicebear.com/9.x/dylan/png?seed=Dishant",
+              uri: USER_AVATAR_IMAGE + userProfile?.name,
             }}
             style={styles.avatar}
           />
         </TouchableOpacity>
       </View>
       <Search />
-      <ScrollView
-        style={styles.scrollAreaView}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          // Add RefreshControl
-          <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
-        }
-      >
-        <View style={styles.tagsContainer}>
-          <Tags
-            includeAllOption={true}
-            setSelected={(tag) => setSelectedTag(tag as string)}
-            selected={selectedTag}
-            items={dashboardData.allTopics.map(transformToTopicModel)} // Use dashboardData from the store
-          />
-        </View>
-        {dashboardData.recentPodcasts &&
-          dashboardData.recentPodcasts.length > 0 && ( // Use dashboardData from the store
-            <PodcastSection
-              title="Recent Podcasts"
-              podcasts={dashboardData.recentPodcasts.map(
-                transformToPodcastModel
-              )} // Use dashboardData from the store
+
+      <PodcastTopicsView
+        theme={theme}
+        isPlaying={currentTrack?.url ? true : false}
+        allTopicsData={dashboardData.allTopics || []}
+        transformToTopicModel={transformToTopicModel}
+        transformToPodcastModel={transformToPodcastModel}
+        onSelectionChange={setShowTopicPodcasts} // Update state based on selection
+      />
+
+      {!showTopicPodcasts && (
+        <ScrollView
+          style={styles.scrollAreaView}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={onRefreshDashboard}
             />
-          )}
-        {dashboardData.mostViewedPodcasts &&
-          dashboardData.mostViewedPodcasts.length > 0 && ( // Use dashboardData from the store
-            <PodcastSection
-              title="Most Viewed Podcasts"
-              podcasts={dashboardData.mostViewedPodcasts.map(
-                transformToPodcastModel
-              )} // Use dashboardData from the store
-            />
-          )}
-      </ScrollView>
+          }
+        >
+          {dashboardData?.recentPodcasts &&
+            dashboardData.recentPodcasts.length > 0 && (
+              <PodcastSection
+                link="/podcasts?sort=recent"
+                title="Recent Podcasts"
+                podcasts={dashboardData.recentPodcasts.map(
+                  transformToPodcastModel
+                )}
+              />
+            )}
+          {dashboardData?.mostViewedPodcasts &&
+            dashboardData.mostViewedPodcasts.length > 0 && (
+              <PodcastSection
+                link="/podcasts?sort=most-viewed"
+                title="Most Viewed Podcasts"
+                podcasts={dashboardData.mostViewedPodcasts.map(
+                  transformToPodcastModel
+                )}
+              />
+            )}
+        </ScrollView>
+      )}
+      {/* Conditional rendering for FlatList or Loader/NoData moved to PodcastTopicsView */}
     </SafeAreaView>
   );
 };
@@ -171,6 +191,8 @@ const madeStyles = makeStyles(
       flex: 1,
     } as ViewStyle,
     scrollAreaView: {
+      // This style is now only for the dashboard ScrollView
+      flex: 1, // Ensure it takes space when PodcastTopicsView doesn't show FlatList
       marginBottom: theme.vh(isPlaying ? 7 : 0),
     } as ViewStyle,
     header: {
@@ -197,9 +219,5 @@ const madeStyles = makeStyles(
       height: theme.vw(13),
       borderRadius: theme.vw(13),
     } as ImageStyle,
-    tagsContainer: {
-      paddingHorizontal: theme.vw(4),
-      marginTop: theme.vh(2),
-    } as ViewStyle,
   })
 );

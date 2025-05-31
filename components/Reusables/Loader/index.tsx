@@ -1,3 +1,4 @@
+import { LOADER_LOTTIE } from "@/utils/constants";
 import { makeStyles, useTheme } from "@/utils/theme/useTheme";
 import LottieView from "lottie-react-native";
 import React from "react";
@@ -10,7 +11,7 @@ const Loader = () => {
     <SafeAreaView style={styles.container}>
       <LottieView
         source={{
-          uri: "https://tiffinspace.blob.core.windows.net/podcastimage/loader.lottie",
+          uri: LOADER_LOTTIE,
         }}
         autoPlay
         loop

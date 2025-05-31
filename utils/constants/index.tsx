@@ -771,3 +771,11 @@ export const PODCASTS = [
 ];
 
 export const ALL_PODCASTS = [...PODCASTS, ...SELF_HELP_PODCASTS];
+
+export const LOADER_LOTTIE =
+  "https://tiffinspace.blob.core.windows.net/podcastimage/loader.lottie";
+
+export const NO_DATA_LOTTIE =
+  "https://tiffinspace.blob.core.windows.net/podcastimage/nodata.lottie";
+
+export const USER_AVATAR_IMAGE = "https://api.dicebear.com/9.x/dylan/png?seed=";
