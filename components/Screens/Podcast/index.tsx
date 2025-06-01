@@ -1,3 +1,4 @@
+import CreateEpisodeSheet from "@/components/Reusables/CreateEpisodeSheet";
 import Duration from "@/components/Reusables/Duration";
 import EpisodesSheet from "@/components/Reusables/EpisodesSheet";
 import IconButton from "@/components/Reusables/IconButton";
@@ -7,17 +8,24 @@ import { getPodcastById } from "@/utils/api/calls";
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
 import { Podcast } from "@/utils/types/podcast";
-import { ArrowLeft01Icon, Bookmark01Icon } from "@hugeicons/core-free-icons";
+import { toast } from "@backpackapp-io/react-native-toast";
+import {
+  AiMicIcon,
+  ArrowLeft01Icon,
+  Bookmark01Icon,
+} from "@hugeicons/core-free-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Image,
   ImageStyle,
+  ScrollView,
   Text,
   TextStyle,
   View,
   ViewStyle,
 } from "react-native";
+import { ActionSheetRef } from "react-native-actions-sheet";
 
 const SinglePodcast: React.FC = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -25,6 +33,7 @@ const SinglePodcast: React.FC = () => {
   const { theme } = useTheme();
   const styles = madeStyles(theme);
   const [podcast, setPodcast] = useState<Podcast | null>(null);
+  const sheetRef = useRef<ActionSheetRef>(null);
 
   useEffect(() => {
     (async () => {
@@ -57,17 +66,30 @@ const SinglePodcast: React.FC = () => {
       <IconButton
         icon={Bookmark01Icon}
         position="rightButton"
-        onPress={() => {}}
+        right={theme.vw(25)}
+        onPress={() => {
+          toast.success("Voice feature coming soon!");
+        }}
+      />
+      <IconButton
+        icon={AiMicIcon}
+        position="rightButton"
+        onPress={() => {
+          sheetRef.current?.show();
+        }}
       />
 
-      <Text style={styles.title}>{podcast?.title}</Text>
-      <View style={styles.durationContainer}>
-        <Duration duration={podcast?.averageDuration} />
-      </View>
-      <Text numberOfLines={5} style={styles.desc}>
-        {podcast?.description || "No description available."}
-      </Text>
-      <EpisodesSheet podcast={podcast} />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>{podcast?.title}</Text>
+        <View style={styles.durationContainer}>
+          <Duration duration={podcast?.averageDuration} />
+        </View>
+        <Text numberOfLines={5} style={styles.desc}>
+          {podcast?.description || "No description available."}
+        </Text>
+        <EpisodesSheet podcast={podcast} />
+      </ScrollView>
+      <CreateEpisodeSheet podcastId={podcast?.id} ref={sheetRef} />
     </View>
   );
 };

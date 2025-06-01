@@ -7,6 +7,8 @@ import TrackPlayer, {
   Track,
 } from "react-native-track-player";
 import { create } from "zustand";
+import handleApiCall from "../api/apiHandler";
+import { recordEpisodePlay } from "../api/calls";
 
 export interface AudioTrack {
   id: string;
@@ -202,6 +204,8 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
           position: 0,
           duration: 0,
         });
+
+        handleApiCall(recordEpisodePlay, [id?.split("::")[1]]);
       }
     } catch (error) {
       console.error("Error loading track:", error);

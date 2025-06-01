@@ -14,9 +14,11 @@ import {
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Duration from "../../Duration";
 
-const EpisodeCard = ({ episode, imageUrl }: Props) => {
+const EpisodeCard = ({ episode, imageUrl, noBackground = false }: Props) => {
   const { theme } = useTheme();
-  const styles = madeStyles(theme);
+  const styles = madeStyles(theme, {
+    noBackground,
+  });
   const router = useRouter();
   const pathname = usePathname();
 
@@ -55,13 +57,18 @@ export default EpisodeCard;
 type Props = {
   episode: Episode;
   imageUrl: string;
+  noBackground?: boolean;
 };
 
-const madeStyles = makeStyles((theme) => {
+type StyleProps = {
+  noBackground?: boolean;
+};
+
+const madeStyles = makeStyles((theme, { noBackground = false }: StyleProps) => {
   return {
     container: {
-      padding: theme.vw(5),
-      backgroundColor: theme.colors.background,
+      padding: theme.vw(4),
+      backgroundColor: noBackground ? "transparent" : theme.colors.tint,
       borderRadius: theme.vw(8),
       flexDirection: "row",
     },
@@ -78,7 +85,6 @@ const madeStyles = makeStyles((theme) => {
       fontSize: theme.fontSizes.mediumSmall,
       color: theme.colors.text,
       fontWeight: theme.fontWeights.bold,
-      marginTop: theme.vh(1),
       marginBottom: theme.vh(0.5),
       fontFamily: theme.fontFamily.bold,
     } as TextStyle,

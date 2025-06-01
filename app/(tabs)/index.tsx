@@ -1,4 +1,5 @@
 import PodcastTopicsView from "@/components/Features/PodcastTopicsView";
+import EpisodeCard from "@/components/Reusables/EpisodesSheet/EpisodeCard";
 import Loader from "@/components/Reusables/Loader";
 import MiniAudioPlayer from "@/components/Reusables/MiniPlayer";
 import PodcastSection from "@/components/Reusables/PodcastSection";
@@ -15,6 +16,7 @@ import {
   TopicApiResponse,
 } from "@/utils/types/dashboard";
 import {
+  Episode,
   Episode as EpisodeModel,
   Podcast as PodcastModel,
   User as UserModel,
@@ -36,7 +38,7 @@ import { ScrollView } from "react-native-gesture-handler";
 
 const HomeScreen = () => {
   const { theme } = useTheme();
-  const { currentTrack } = useAudioPlayerState();
+  const { currentTrack, isPlaying } = useAudioPlayerState();
   const { dashboardData, fetchDashboard } = useDashboardStore();
   const { userProfile } = useUserStore();
 
@@ -149,6 +151,24 @@ const HomeScreen = () => {
             />
           }
         >
+          {!isPlaying && dashboardData?.recentlyPlayedEpisodes?.[0]?.id && (
+            <View style={styles.recentContainer}>
+              <EpisodeCard
+                noBackground
+                episode={
+                  {
+                    ...dashboardData.recentlyPlayedEpisodes[0],
+                    description:
+                      dashboardData.recentlyPlayedEpisodes[0].podcastTitle ||
+                      "",
+                  } as unknown as Episode
+                }
+                imageUrl={
+                  dashboardData.recentlyPlayedEpisodes[0].coverImage || ""
+                }
+              />
+            </View>
+          )}
           {dashboardData?.recentPodcasts &&
             dashboardData.recentPodcasts.length > 0 && (
               <PodcastSection
@@ -201,6 +221,9 @@ const madeStyles = makeStyles(
       alignItems: "center",
       justifyContent: "space-between",
       marginBottom: theme.vh(2),
+    } as ViewStyle,
+    recentContainer: {
+      paddingHorizontal: theme.vw(4),
     } as ViewStyle,
     title: {
       fontSize: theme.fontSizes.medium,

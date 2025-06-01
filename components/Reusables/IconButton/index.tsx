@@ -5,13 +5,40 @@ import { TouchableOpacity, ViewStyle } from "react-native";
 
 const statusBarHeight = Constants.statusBarHeight;
 
-const IconButton: React.FC<IconButtonProps> = ({ icon, position, onPress }) => {
+const IconButton: React.FC<IconButtonProps> = ({
+  icon,
+  position,
+  onPress,
+  top,
+  left,
+  right,
+}) => {
   const { theme } = useTheme();
   const styles = madeStyles(theme);
+
+  // Create custom style based on provided position props
+  const customPositionStyle: ViewStyle = {};
+
+  if (top !== undefined) {
+    customPositionStyle.top = top;
+  }
+
+  if (left !== undefined) {
+    customPositionStyle.left = left;
+  }
+
+  if (right !== undefined) {
+    customPositionStyle.right = right;
+  }
+
   return (
     <TouchableOpacity
       activeOpacity={0.7}
-      style={[styles.iconButton, styles[position]]}
+      style={[
+        styles.iconButton,
+        styles[position],
+        Object.keys(customPositionStyle).length > 0 ? customPositionStyle : {},
+      ]}
       onPress={onPress}
     >
       <HugeiconsIcon
@@ -52,6 +79,9 @@ type IconButtonProps = {
   icon: any;
   position: "leftButton" | "rightButton";
   onPress: () => void;
+  top?: number;
+  left?: number;
+  right?: number;
 };
 
 export default IconButton;

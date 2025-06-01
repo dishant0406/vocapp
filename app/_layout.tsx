@@ -21,12 +21,12 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { darkTheme, lightTheme } from "@/utils/theme/theme";
 import { useTheme } from "@/utils/theme/useTheme";
-import { Toaster } from "sonner-native";
 
 import { ENV } from "@/constants/variables";
 import { apiClient } from "@/utils/api/client";
 import { useAudioEvents } from "@/utils/hooks/audioEvents";
 import useUserStore from "@/utils/store/userStore";
+import { Toasts } from "@backpackapp-io/react-native-toast";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -113,12 +113,25 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
-        <Toaster
-          theme="system"
-          style={{
-            borderRadius: 8,
-            borderColor: theme.colors.border,
-            borderWidth: 1,
+        <Toasts
+          defaultStyle={{
+            view: {
+              backgroundColor: theme.colors.background,
+              borderWidth: 1,
+              borderColor: theme.colors.secondaryForeground,
+              borderRadius: theme.vw(4),
+            },
+            text: {
+              color: theme.colors.text,
+              fontFamily: theme.fontFamily.medium,
+            },
+            indicator: {
+              backgroundColor: theme.colors.background,
+              display: "none",
+            },
+            pressable: {
+              borderRadius: theme.vw(4),
+            },
           }}
         />
       </GestureHandlerRootView>

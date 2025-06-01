@@ -119,7 +119,7 @@ const Tags = ({
   };
 
   return (
-    <View style={styles.scrollContainer}>
+    <View>
       <ScrollView
         showsHorizontalScrollIndicator={false}
         horizontal
@@ -144,9 +144,6 @@ const madeStyles = makeStyles((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     gap: theme.vw(2),
-  } as ViewStyle,
-  scrollContainer: {
-    paddingBottom: theme.vh(4),
   } as ViewStyle,
 }));
 

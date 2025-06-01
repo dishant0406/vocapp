@@ -1,7 +1,7 @@
 import { Button } from "@/components/Micro/Button";
 import Input from "@/components/Micro/Input";
 import handleApiCall from "@/utils/api/apiHandler";
-import { createPodcast } from "@/utils/api/calls";
+import { addEpisodeToPodcast } from "@/utils/api/calls";
 import useDashboardStore from "@/utils/store/dashboardStore";
 import { makeStyles, useTheme } from "@/utils/theme/useTheme";
 import { toast } from "@backpackapp-io/react-native-toast";
@@ -19,7 +19,7 @@ import ActionSheet, { ActionSheetRef } from "react-native-actions-sheet";
 import Tags from "../Tags";
 
 type CreateSheetProps = {
-  // Add any props you need here
+  podcastId: string;
 };
 
 const DURATION_OPTIONS = [
@@ -28,8 +28,8 @@ const DURATION_OPTIONS = [
   { value: "2 hours", id: "120" },
 ];
 
-const CreateSheet = forwardRef(
-  (props: CreateSheetProps, ref: ForwardedRef<ActionSheetRef>) => {
+const CreateEpisodeSheet = forwardRef(
+  ({ podcastId }: CreateSheetProps, ref: ForwardedRef<ActionSheetRef>) => {
     const { theme } = useTheme();
     const [topic, setTopic] = useState<string>("");
     const [selectedDuration, setSelectedDuration] = useState<string | null>(
@@ -50,26 +50,33 @@ const CreateSheet = forwardRef(
     };
 
     const handleCreate = async () => {
-      if (!topic || !selectedDuration) return;
+      if (!selectedDuration) return;
       Keyboard.dismiss();
-      await handleApiCall(createPodcast, [topic, selectedDuration], {
-        onSuccess: () => {
-          fetchDashboard();
-          toast.success(
-            "Podcast creation started! We'll notify you when it's ready.",
-            {
-              duration: 5000,
-            }
-          );
-          setTimeout(() => {
-            handleClose();
-          }, 500);
-        },
-        setLoading: setLoading,
-        onError: (error) => {
-          setError(error || "Failed to create podcast");
-        },
-      });
+
+      const searchQuery = topic || ""; // Allow empty string for topic/query
+
+      await handleApiCall(
+        addEpisodeToPodcast,
+        [podcastId, searchQuery, selectedDuration],
+        {
+          onSuccess: () => {
+            fetchDashboard();
+            toast.success(
+              "Episode creation started! We'll notify you when it's ready.",
+              {
+                duration: 5000,
+              }
+            );
+            setTimeout(() => {
+              handleClose();
+            }, 500);
+          },
+          setLoading: setLoading,
+          onError: (error) => {
+            setError(error || "Failed to create episode");
+          },
+        }
+      );
     };
 
     return (
@@ -86,13 +93,13 @@ const CreateSheet = forwardRef(
       >
         <KeyboardAvoidingView>
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>Create your own podcast</Text>
+            <Text style={styles.title}>Add New Episode</Text>
           </View>
           <Input
             readOnly={loading}
             keyboardAvoidingEnabled={true}
-            placeholder="latest news, tech, or anything else"
-            label="Anything in mind?"
+            placeholder="Add a topic or leave empty"
+            label="Something in mind? (Optional)"
             value={topic}
             onChange={(e) => setTopic(e.nativeEvent.text)}
           />
@@ -103,17 +110,17 @@ const CreateSheet = forwardRef(
             selected={selectedDuration}
             setSelected={(value) => setSelectedDuration(value as string)}
             includeAllOption={false}
-            isMultiSelect={false} // Added
+            isMultiSelect={false}
           />
           <Button
             style={styles.button}
-            disabled={!topic || !selectedDuration || loading}
+            disabled={!selectedDuration || loading}
             textStyle={styles.label}
             onPress={handleCreate}
             variant="secondary"
             loading={loading}
           >
-            Create Podcast
+            Add Episode
           </Button>
         </KeyboardAvoidingView>
       </ActionSheet>
@@ -121,7 +128,7 @@ const CreateSheet = forwardRef(
   }
 );
 
-export default CreateSheet;
+export default CreateEpisodeSheet;
 
 const madeStyles = makeStyles((theme) => {
   return StyleSheet.create({
@@ -138,6 +145,7 @@ const madeStyles = makeStyles((theme) => {
       alignItems: "center",
       justifyContent: "space-between",
       marginBottom: theme.vh(3),
+      marginTop: theme.vh(1),
     } as ViewStyle,
     title: {
       fontSize: theme.fontSizes.mediumSmall,
@@ -159,8 +167,8 @@ const madeStyles = makeStyles((theme) => {
     button: {
       width: "100%",
       height: theme.vh(7),
-      borderRadius: theme.vw(10),
       marginTop: theme.vh(4),
+      borderRadius: theme.vw(10),
       backgroundColor: theme.colors.background,
     },
   });

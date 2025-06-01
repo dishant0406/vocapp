@@ -1,16 +1,8 @@
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
 import { Podcast } from "@/utils/types/podcast";
-import React, { useEffect } from "react";
-import {
-  Text,
-  TextStyle,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from "react-native";
-import ActionSheet, { useSheetRef } from "react-native-actions-sheet";
-import { ScrollView } from "react-native-gesture-handler";
+import React from "react";
+import { Text, TextStyle, View, ViewStyle } from "react-native";
 import EpisodeCard from "./EpisodeCard";
 
 type Props = {
@@ -18,45 +10,16 @@ type Props = {
 };
 
 const EpisodesSheet = ({ podcast }: Props) => {
-  const ref = useSheetRef();
   const { theme } = useTheme();
   const styles = madeStyles(theme);
 
-  const openSheet = () => {
-    ref.current?.setModalVisible(true);
-  };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      openSheet();
-    }, 200);
-
-    return () => clearTimeout(timer);
-  }, []);
   return (
-    <ActionSheet
-      isModal={false}
-      backgroundInteractionEnabled
-      snapPoints={[40, 100]}
-      gestureEnabled
-      closable={false}
-      disableDragBeyondMinimumSnapPoint
-      containerStyle={styles.sheetContainer}
-    >
+    <View style={styles.sheetContainer}>
       <View>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>All Episodes</Text>
-          <TouchableOpacity activeOpacity={0.7}>
-            <Text style={styles.link}>Show All</Text>
-          </TouchableOpacity>
         </View>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            rowGap: theme.vh(2),
-          }}
-          style={styles.episodesContainer}
-        >
+        <View style={styles.episodesContainer}>
           {podcast.episodes.map((episode, index) => (
             <EpisodeCard
               imageUrl={podcast.coverImage}
@@ -64,26 +27,24 @@ const EpisodesSheet = ({ podcast }: Props) => {
               episode={episode}
             />
           ))}
-        </ScrollView>
+        </View>
       </View>
-    </ActionSheet>
+    </View>
   );
 };
 
 const madeStyles = makeStyles((theme) => {
   return {
     sheetContainer: {
-      paddingTop: theme.vh(2),
-      paddingBottom: theme.vh(2),
-      paddingHorizontal: theme.vw(6),
-      borderTopLeftRadius: theme.vw(10),
-      borderTopRightRadius: theme.vw(10),
-      backgroundColor: theme.colors.tint,
+      marginTop: theme.vh(2),
+      paddingBottom: theme.vh(6),
+      paddingHorizontal: theme.vw(4),
     } as ViewStyle,
     titleContainer: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
+      paddingBottom: theme.vh(1),
     } as ViewStyle,
     title: {
       fontSize: theme.fontSizes.mediumSmall,
@@ -98,8 +59,7 @@ const madeStyles = makeStyles((theme) => {
       fontFamily: theme.fontFamily.bold,
     } as TextStyle,
     episodesContainer: {
-      marginTop: theme.vh(2),
-      height: theme.vh(50),
+      gap: theme.vh(2),
     } as ViewStyle,
   };
 });

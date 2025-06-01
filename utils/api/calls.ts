@@ -62,3 +62,18 @@ export const getPodcastsByTopics = async (
 export const getUserProfile = async () => {
   return apiClient.get("/users/profile");
 };
+
+export const recordEpisodePlay = async (episodeId: string) => {
+  return apiClient.post(`/episodes/episodes/${episodeId}/play`);
+};
+
+export const addEpisodeToPodcast = async (
+  podcastId: string,
+  query: string,
+  duration: string
+) => {
+  return apiClient.post(`/episodes/podcasts/${podcastId}/episodes`, {
+    query,
+    duration,
+  });
+};
