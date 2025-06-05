@@ -8,8 +8,8 @@ import { ImageStyle, Text, TextStyle, View } from "react-native";
 const Duration = ({ duration = 0 }: { duration?: number }) => {
   const formatDuration = (duration: number) => {
     const hours = Math.floor(duration / 60);
-    const minutes = duration % 60;
-    return `${hours > 0 ? `${hours}h ` : ""}${minutes}m`;
+    const minutes = (duration % 60)?.toFixed(0);
+    return `${hours > 0 ? `${hours?.toFixed(0)}h ` : ""}${minutes}m`;
   };
   const formattedDuration = formatDuration(duration || 0);
   const durationText = duration
