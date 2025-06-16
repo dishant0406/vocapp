@@ -12,9 +12,7 @@ const Duration = ({ duration = 0 }: { duration?: number }) => {
     return `${hours > 0 ? `${hours?.toFixed(0)}h ` : ""}${minutes}m`;
   };
   const formattedDuration = formatDuration(duration || 0);
-  const durationText = duration
-    ? `${formattedDuration} remaining`
-    : "30 min remaining";
+  const durationText = duration ? `${formattedDuration}` : "30 min";
 
   const { theme } = useTheme();
   const styles = maadeStyles(theme);

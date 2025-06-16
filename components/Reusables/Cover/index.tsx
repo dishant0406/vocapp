@@ -1,9 +1,9 @@
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
-import { useRouter } from "expo-router";
+import { Image } from "expo-image";
+import { Href, useRouter } from "expo-router";
 import React from "react";
 import {
-  Image,
   ImageStyle,
   Text,
   TextStyle,
@@ -21,27 +21,25 @@ type Props = {
   onPress?: () => void;
   selected?: boolean;
   style?: any;
+  link?: string;
 };
+
+const BLUR_HASH = "e5CPz.0000-:?Z00^*t6_19H00~U?ZD*WCM|xt-.02-ot7R*Rk%1Rk";
 
 const Cover = (props: Props) => {
   const { theme } = useTheme();
   const styles = madeStyles(theme);
-  const { title, imageUrl, duration } = props;
+  const { title, imageUrl, duration, link } = props;
 
   const router = useRouter();
 
   return (
     <TouchableOpacity
-      onPress={() => router.push(`/podcast/${props.id}`)}
+      onPress={() => router.push((link || `/podcast/${props.id}`) as Href)}
       activeOpacity={0.8}
       style={styles.container}
     >
-      <Image
-        source={{
-          uri: imageUrl || "",
-        }}
-        style={styles.cover}
-      />
+      <Image placeholder={BLUR_HASH} source={imageUrl} style={styles.cover} />
       <View style={styles.contentContainer}>
         <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">
           {title || ""}

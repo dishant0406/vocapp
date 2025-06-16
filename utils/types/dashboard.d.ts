@@ -29,6 +29,7 @@ export type RecentlyPlayedEpisodeApiResponse = {
   coverImage?: string;
   audioUrl: string;
   duration: number;
+  podcastId: string;
 };
 
 export type DashboardDataApiResponse = {

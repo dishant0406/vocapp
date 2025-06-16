@@ -11,7 +11,6 @@ import {
   Message01Icon,
   Settings04Icon,
   Share07Icon,
-  UserSharingIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useRouter } from "expo-router";
@@ -87,26 +86,29 @@ const Profile = () => {
         </View>
         <View style={styles.optionsContainer}>
           <Option
-            icon={UserSharingIcon}
-            title="Edit Profile"
-            onPress={() => {}}
-          />
-          <Option
             icon={Crown03Icon}
             title="My Subscription"
             onPress={() => {}}
           />
-          <Option icon={Settings04Icon} title="Settings" onPress={() => {}} />
+          <Option
+            icon={Settings04Icon}
+            title="App Settings"
+            onPress={() => {}}
+          />
           <Option
             icon={Share07Icon}
             title="Invite Friends"
             onPress={() => {}}
           />
-          <Option icon={Message01Icon} title="Support" onPress={() => {}} />
+          <Option
+            icon={Message01Icon}
+            title="Contact Us"
+            onPress={() => router.push("/contact")}
+          />
           <Option
             icon={AlertSquareIcon}
             title="Terms and Conditions"
-            onPress={() => {}}
+            onPress={() => router.push("/terms")}
           />
           <Option
             icon={Login03Icon}

@@ -779,3 +779,113 @@ export const NO_DATA_LOTTIE =
   "https://tiffinspace.blob.core.windows.net/podcastimage/nodata.lottie";
 
 export const USER_AVATAR_IMAGE = "https://api.dicebear.com/9.x/dylan/png?seed=";
+export const TERMS_AND_CONDITIONS = {
+  title: "Terms & Conditions",
+  lastUpdated: "June 15, 2025",
+  sections: [
+    {
+      title: "Acceptance of Terms",
+      content: [
+        "By accessing or using Vocapp, you agree to be bound by these Terms & Conditions. If you do not agree, please do not use our services.",
+      ],
+    },
+    {
+      title: "Use of Service",
+      content: [
+        "You agree to use Vocapp in compliance with all applicable laws. You are responsible for maintaining the confidentiality of your account.",
+      ],
+    },
+    {
+      title: "Account Registration & Security",
+      content: [
+        "To access certain features, you may need to register for an account. You agree to provide accurate information and keep your credentials secure. You are responsible for all activity under your account.",
+      ],
+    },
+    {
+      title: "User Content & Conduct",
+      content: [
+        "You may not use Vocapp to upload, share, or generate content that is unlawful, harmful, or infringes on others' rights. We reserve the right to remove content or suspend accounts that violate these terms.",
+      ],
+    },
+    {
+      title: "Subscription & Payments",
+      content: [
+        "Some features are available via paid subscription. By subscribing, you agree to the pricing, billing, and renewal terms presented at checkout. All fees are non-refundable except as required by law.",
+      ],
+    },
+    {
+      title: "Intellectual Property",
+      content: [
+        "All content, trademarks, and data on Vocapp are the property of Vocapp Technologies Pvt. Ltd. or its licensors.",
+      ],
+    },
+    {
+      title: "Third-Party Services",
+      content: [
+        "Vocapp may integrate with third-party services (e.g., news APIs, payment processors). We are not responsible for the content or practices of these external services.",
+      ],
+    },
+    {
+      title: "Limitation of Liability",
+      content: [
+        'Vocapp is provided "as is" without warranties. We are not liable for any damages arising from your use of the service.',
+      ],
+    },
+    {
+      title: "Termination",
+      content: [
+        "We may suspend or terminate your access to Vocapp at our discretion, especially if you violate these terms. You may also delete your account at any time by contacting support.",
+      ],
+    },
+    {
+      title: "Governing Law",
+      content: [
+        "These Terms & Conditions are governed by the laws of the jurisdiction where Vocapp Technologies Pvt. Ltd. is registered, without regard to conflict of law principles.",
+      ],
+    },
+    {
+      title: "Changes to Terms",
+      content: [
+        "We may update these Terms & Conditions from time to time. Continued use of the service constitutes acceptance of the new terms.",
+      ],
+    },
+    {
+      title: "Contact",
+      content: [
+        "For questions about these terms, contact us at info@vocapp.live.",
+      ],
+    },
+  ],
+  contactEmail: "info@vocapp.live",
+  companyName: "Vocapp Technologies Pvt. Ltd.",
+};
+
+export const CONTACT_US = {
+  title: "Contact Us",
+  sections: [
+    {
+      title: "General Inquiries",
+      content: ["Email: info@vocapp.live", "Website: https://vocapp.live"],
+    },
+    {
+      title: "Support",
+      content: [
+        "For technical support or account issues, email us with a description of your problem. Our team aims to respond within 2 business days.",
+      ],
+    },
+    {
+      title: "Business & Partnerships",
+      content: [
+        "Interested in partnering, advertising, or business development? Contact us to discuss collaboration opportunities.",
+      ],
+    },
+    {
+      title: "Media & Press",
+      content: [
+        "For press inquiries, interviews, or media kits, please reach out via email. We are happy to provide information about Vocapp, our technology, and our team.",
+      ],
+    },
+  ],
+  contactEmail: "info@vocapp.live",
+  website: "https://vocapp.live",
+};

@@ -77,3 +77,24 @@ export const addEpisodeToPodcast = async (
     duration,
   });
 };
+
+// Bookmark API calls
+export const createBookmark = async (itemId: string) => {
+  return apiClient.post("/bookmarks", { itemId });
+};
+
+export const getMyBookmarks = async () => {
+  return apiClient.get("/bookmarks");
+};
+
+export const deleteBookmark = async (bookmarkId: string) => {
+  return apiClient.delete(`/bookmarks/${bookmarkId}`);
+};
+
+export const checkIfBookmarked = async (itemId: string) => {
+  return apiClient.get(`/bookmarks/check/${itemId}`);
+};
+
+export const removeBookmarkByItemId = async (itemId: string) => {
+  return apiClient.delete(`/bookmarks/item/${itemId}`);
+};

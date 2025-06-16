@@ -88,7 +88,8 @@ const HomeScreen = () => {
   const transformToTopicModel = useCallback((topic: TopicApiResponse) => {
     return {
       id: topic.id,
-      value: topic.name,
+      value:
+        topic.name.charAt(0).toUpperCase() + topic.name.slice(1).toLowerCase(),
     };
   }, []);
 
@@ -153,7 +154,11 @@ const HomeScreen = () => {
         >
           {!isPlaying && dashboardData?.recentlyPlayedEpisodes?.[0]?.id && (
             <View style={styles.recentContainer}>
+              <Text style={styles.sectionTitle}>Recently Played</Text>
               <EpisodeCard
+                playIcon
+                link={`/podcast/${dashboardData.recentlyPlayedEpisodes[0].podcastId}/${dashboardData.recentlyPlayedEpisodes[0].id}`}
+                imageType="square"
                 noBackground
                 episode={
                   {
@@ -229,6 +234,12 @@ const madeStyles = makeStyles(
       fontSize: theme.fontSizes.medium,
       color: theme.colors.text,
       fontWeight: "bold",
+      fontFamily: theme.fontFamily.bold,
+    } as TextStyle,
+    sectionTitle: {
+      fontSize: theme.fontSizes.small,
+      color: theme.colors.text,
+      fontWeight: theme.fontWeights.bold,
       fontFamily: theme.fontFamily.bold,
     } as TextStyle,
     subtitle: {

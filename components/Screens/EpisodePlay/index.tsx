@@ -4,9 +4,16 @@ import IconButton from "@/components/Reusables/IconButton";
 import Loader from "@/components/Reusables/Loader";
 import handleApiCall from "@/utils/api/apiHandler";
 import { getPodcastById } from "@/utils/api/calls";
+import useBookmarkStore from "@/utils/store/bookmarkStore";
 import { makeStyles, useTheme } from "@/utils/theme/useTheme";
 import { Podcast } from "@/utils/types/podcast";
-import { ArrowLeft01Icon, CloudDownloadIcon } from "@hugeicons/core-free-icons";
+import { toast } from "@backpackapp-io/react-native-toast";
+import {
+  ArrowLeft01Icon,
+  Bookmark01Icon,
+  BookmarkAdd01Icon,
+  CloudDownloadIcon,
+} from "@hugeicons/core-free-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { SafeAreaView, Text, TextStyle, View, ViewStyle } from "react-native";
@@ -33,6 +40,12 @@ const EpisodePlay = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // Bookmark functionality
+  const { addBookmark, removeBookmark, checkBookmarkStatus } =
+    useBookmarkStore();
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
 
   // Memoize the API call function to prevent recreating it on every render
   const fetchPodcast = useCallback(async (id: string) => {
@@ -66,6 +79,48 @@ const EpisodePlay = () => {
       fetchPodcast(podcastId);
     }
   }, [podcastId, fetchPodcast]);
+
+  // Check bookmark status when episode data is available
+  useEffect(() => {
+    if (episodeId) {
+      const checkStatus = async () => {
+        const bookmarkStatus = await checkBookmarkStatus(episodeId);
+        setIsBookmarked(bookmarkStatus);
+      };
+      checkStatus();
+    }
+  }, [episodeId, checkBookmarkStatus]);
+
+  const handleBookmarkToggle = async () => {
+    if (!episodeId || bookmarkLoading) return;
+
+    setBookmarkLoading(true);
+
+    try {
+      if (isBookmarked) {
+        const success = await removeBookmark(episodeId);
+        if (success) {
+          setIsBookmarked(false);
+          toast.success("Episode removed from bookmarks!");
+        } else {
+          toast.error("Failed to remove bookmark");
+        }
+      } else {
+        const success = await addBookmark(episodeId);
+        if (success) {
+          setIsBookmarked(true);
+          toast.success("Episode added to bookmarks!");
+        } else {
+          toast.error("Failed to add bookmark");
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+      toast.error("Something went wrong");
+    } finally {
+      setBookmarkLoading(false);
+    }
+  };
 
   // Memoize episode data to prevent unnecessary recalculations
   const episodeData = useMemo(() => {
@@ -127,6 +182,12 @@ const EpisodePlay = () => {
         onPress={() => {
           // Add download functionality here
         }}
+      />
+      <IconButton
+        icon={isBookmarked ? Bookmark01Icon : BookmarkAdd01Icon}
+        position="rightButton"
+        right={theme.vw(25)}
+        onPress={handleBookmarkToggle}
       />
       <View style={styles.diskContainer}>
         <Disk isPlaying={false} image={IMAGE} />

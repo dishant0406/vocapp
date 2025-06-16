@@ -5,9 +5,9 @@ import { Tabs } from "expo-router";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 
 import {
-  CloudDownloadIcon,
   Home11Icon,
   PodcastIcon,
+  StarSquareIcon,
 } from "@hugeicons/core-free-icons";
 
 import CreateSheet from "@/components/Reusables/CreateSheet";
@@ -63,11 +63,11 @@ export default function TabLayout() {
         />
 
         <Tabs.Screen
-          name="download"
+          name="bookmark"
           options={{
             title: "",
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon color={color} icon={CloudDownloadIcon} />
+              <TabBarIcon color={color} icon={StarSquareIcon} />
             ),
           }}
         />

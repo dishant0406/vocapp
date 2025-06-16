@@ -5,6 +5,7 @@ import IconButton from "@/components/Reusables/IconButton";
 import Loader from "@/components/Reusables/Loader";
 import handleApiCall from "@/utils/api/apiHandler";
 import { getPodcastById } from "@/utils/api/calls";
+import useBookmarkStore from "@/utils/store/bookmarkStore";
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
 import { Podcast } from "@/utils/types/podcast";
@@ -13,6 +14,7 @@ import {
   AiMicIcon,
   ArrowLeft01Icon,
   Bookmark01Icon,
+  BookmarkAdd01Icon,
 } from "@hugeicons/core-free-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -35,6 +37,11 @@ const SinglePodcast: React.FC = () => {
   const [podcast, setPodcast] = useState<Podcast | null>(null);
   const sheetRef = useRef<ActionSheetRef>(null);
 
+  // Bookmark functionality
+  const { addBookmark, removeBookmark, isItemBookmarked, checkBookmarkStatus } = useBookmarkStore();
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
+
   useEffect(() => {
     (async () => {
       handleApiCall(getPodcastById, [id], {
@@ -47,6 +54,48 @@ const SinglePodcast: React.FC = () => {
       });
     })();
   }, [id]);
+
+  // Check bookmark status when component mounts or podcast changes
+  useEffect(() => {
+    if (podcast?.id) {
+      const checkStatus = async () => {
+        const bookmarkStatus = await checkBookmarkStatus(podcast.id);
+        setIsBookmarked(bookmarkStatus);
+      };
+      checkStatus();
+    }
+  }, [podcast?.id, checkBookmarkStatus]);
+
+  const handleBookmarkToggle = async () => {
+    if (!podcast?.id || bookmarkLoading) return;
+
+    setBookmarkLoading(true);
+
+    try {
+      if (isBookmarked) {
+        const success = await removeBookmark(podcast.id);
+        if (success) {
+          setIsBookmarked(false);
+          toast.success("Removed from bookmarks!");
+        } else {
+          toast.error("Failed to remove bookmark");
+        }
+      } else {
+        const success = await addBookmark(podcast.id);
+        if (success) {
+          setIsBookmarked(true);
+          toast.success("Added to bookmarks!");
+        } else {
+          toast.error("Failed to add bookmark");
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+      toast.error("Something went wrong");
+    } finally {
+      setBookmarkLoading(false);
+    }
+  };
 
   if (!podcast) {
     return <Loader />;
@@ -64,11 +113,13 @@ const SinglePodcast: React.FC = () => {
       />
 
       <IconButton
-        icon={Bookmark01Icon}
+        icon={isBookmarked ? Bookmark01Icon : BookmarkAdd01Icon}
         position="rightButton"
         right={theme.vw(25)}
         onPress={() => {
-          toast.success("Voice feature coming soon!");
+          if (!bookmarkLoading) {
+            handleBookmarkToggle();
+          }
         }}
       />
       <IconButton
