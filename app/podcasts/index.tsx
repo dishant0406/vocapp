@@ -179,13 +179,13 @@ const madeStyles = makeStyles((theme) => ({
   } as ViewStyle,
 
   header: {
-    padding: theme.vw(4),
+    paddingHorizontal: theme.vw(4),
     flexDirection: "row",
-    marginTop: theme.vh(1.5),
+    marginTop: theme.vh(0.5),
     marginLeft: theme.vw(22),
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: theme.vh(2),
+    marginBottom: theme.vh(4),
   } as ViewStyle,
   title: {
     fontSize: theme.fontSizes.medium,

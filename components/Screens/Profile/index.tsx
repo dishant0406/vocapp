@@ -10,7 +10,6 @@ import {
   Login03Icon,
   Message01Icon,
   Settings04Icon,
-  Share07Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useRouter } from "expo-router";
@@ -95,11 +94,11 @@ const Profile = () => {
             title="App Settings"
             onPress={() => {}}
           />
-          <Option
+          {/* <Option
             icon={Share07Icon}
             title="Invite Friends"
             onPress={() => {}}
-          />
+          /> */}
           <Option
             icon={Message01Icon}
             title="Contact Us"

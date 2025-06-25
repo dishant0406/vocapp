@@ -43,7 +43,7 @@ const TermsAndConditions = () => {
         <IconButton
           icon={ArrowLeft01Icon}
           position="leftButton"
-          top={theme.vh(0.5)}
+          top={theme.vh(1)}
           left={theme.vw(3)}
           onPress={() => router.back()}
         />
@@ -93,8 +93,7 @@ const madeStyles = makeStyles(
     header: {
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: theme.vw(4),
+      justifyContent: "center",
       paddingVertical: theme.vh(2),
       paddingBottom: theme.vh(3),
     } as ViewStyle,
@@ -105,7 +104,6 @@ const madeStyles = makeStyles(
       fontSize: theme.fontSizes.medium,
       fontFamily: theme.fontFamily.bold,
       color: theme.colors.text,
-      marginLeft: theme.vw(18),
     } as TextStyle,
     placeholderView: {
       width: theme.vw(10),

@@ -1,3 +1,4 @@
+// components/AudioPlayer.tsx
 import {
   useAudioPlayerControls,
   useAudioPlayerState,
@@ -15,25 +16,26 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import React, { forwardRef, useEffect, useImperativeHandle } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+
 import Waveform from "./WaveForm";
+
+export type AudioPlayerHandle = {
+  isPlaying: boolean;
+};
 
 type AudioPlayerProps = {
   id: string;
-  url: string;
+  url: string; // m3u8 HLS stream URL
   title?: string;
   artist?: string;
   coverImage?: string;
   onPlayStateChange?: (isPlaying: boolean) => void;
 };
 
-export type AudioPlayerHandle = {
-  isPlaying: boolean;
-};
-
 const formatTime = (sec: number) => {
-  const min = Math.floor(sec / 60);
+  const m = Math.floor(sec / 60);
   const s = Math.floor(sec % 60);
-  return `${min}:${s < 10 ? "0" : ""}${s}`;
+  return `${m}:${s < 10 ? "0" : ""}${s}`;
 };
 
 const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
@@ -47,6 +49,9 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
       position,
       duration,
     } = useAudioPlayerState();
+    const [waveFormData, setWaveformData] = React.useState<number[]>(
+      Array.from({ length: 100 }, () => Math.random() * 100)
+    );
 
     const {
       loadTrack,
@@ -61,26 +66,16 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
     const { theme } = useTheme();
     const styles = madeStyles(theme);
 
-    // Expose isPlaying on the ref
-    useImperativeHandle(
-      ref,
-      () => ({
-        isPlaying,
-      }),
-      [isPlaying]
-    );
+    useImperativeHandle(ref, () => ({ isPlaying }), [isPlaying]);
 
-    // Load track only when URL changes (not when title/artist changes)
     useEffect(() => {
       if (url && (!currentTrack || currentTrack.url !== url)) {
         loadTrack(id, url, title, artist, coverImage);
       }
-    }, [url, currentTrack?.url, loadTrack]);
+    }, [url, currentTrack?.url]);
 
-    // Update track metadata if title/artist changes for same URL
     useEffect(() => {
       if (currentTrack && currentTrack.url === url) {
-        // Only update if title or artist actually changed
         if (
           (title && title !== currentTrack.title) ||
           (artist && artist !== currentTrack.artist) ||
@@ -90,16 +85,12 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
           updateTrackMetadata(id, title, artist, coverImage);
         }
       }
-    }, [title, artist, currentTrack, id, url, updateTrackMetadata, coverImage]);
+    }, [title, artist, coverImage, id, url]);
 
-    // Inform parent of play state changes
     useEffect(() => {
-      if (onPlayStateChange) {
-        onPlayStateChange(isPlaying);
-      }
-    }, [isPlaying, onPlayStateChange]);
+      if (onPlayStateChange) onPlayStateChange(isPlaying);
+    }, [isPlaying]);
 
-    // Show loading state
     if (isLoading || !currentTrack) {
       return (
         <View
@@ -116,9 +107,10 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
       );
     }
 
+    // const progressPercent = duration > 0 ? (position / duration) * 100 : 0;
+
     return (
       <View style={styles.container}>
-        {/* Top controls */}
         <View style={styles.topRow}>
           <TouchableOpacity onPress={toggleMute}>
             <HugeiconsIcon
@@ -159,12 +151,16 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
           </TouchableOpacity>
         </View>
 
-        {/* Waveform & Time */}
-        <View style={styles.waveformRow}>
+        <View style={styles.progressRow}>
           <Text style={styles.timeText}>{formatTime(position)}</Text>
+          {/* <View style={styles.progressBar}>
+            <View
+              style={[styles.progressFill, { width: `${progressPercent}%` }]}
+            />
+          </View> */}
           <View style={styles.waveformContainer}>
             <Waveform
-              data={currentTrack.waveformData?.[0] || []}
+              data={waveFormData}
               maxDuration={duration}
               currentProgress={position}
               containerStyle={styles.waveformInner}
@@ -224,6 +220,24 @@ const madeStyles = makeStyles((theme) => ({
     width: "100%",
     height: "100%",
     backgroundColor: "transparent",
+  },
+  progressRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    marginTop: theme.vh(2),
+  },
+  progressBar: {
+    flex: 1,
+    height: theme.vh(2),
+    backgroundColor: theme.colors.border,
+    borderRadius: theme.vw(1),
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    backgroundColor: theme.colors.accentForeground,
+    borderRadius: theme.vw(1),
   },
 }));
 

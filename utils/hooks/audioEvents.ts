@@ -43,7 +43,7 @@ export const useAudioEvents = () => {
       switch (event.type) {
         case Event.PlaybackError:
           if ("message" in event) {
-            console.error("Playback error:", event.message);
+            console.error("Playback error:", event);
           }
           break;
         case Event.PlaybackTrackChanged:

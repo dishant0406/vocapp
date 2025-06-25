@@ -33,6 +33,7 @@ export interface Episode {
   episodeNumber: number;
   duration: number; // Duration in minutes
   audioUrl: string;
+  hlsUrl: string;
   transcript: string;
   searchQuery: string;
   status: "ready" | "processing" | "error" | "pending"; // Based on "ready", assuming other statuses

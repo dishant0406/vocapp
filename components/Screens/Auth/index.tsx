@@ -3,7 +3,6 @@ import { AUTH_IMAGE_URL } from "@/constants/variables";
 import { performGoogleSignIn } from "@/utils/auth/google";
 import useUserStore from "@/utils/store/userStore";
 import { makeStyles, useTheme } from "@/utils/theme/useTheme";
-import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import {
   Image,
@@ -13,8 +12,6 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-
-const statusBarHeight = Constants.statusBarHeight;
 
 const Auth = () => {
   const { theme } = useTheme();
@@ -64,7 +61,7 @@ const madeStyles = makeStyles((theme) => {
       backgroundColor: theme.colors.background,
     } as ViewStyle,
     imageContainer: {
-      paddingTop: theme.vh(5) + statusBarHeight,
+      paddingTop: theme.vh(5),
       justifyContent: "center",
       alignItems: "center",
       width: theme.vw(100),

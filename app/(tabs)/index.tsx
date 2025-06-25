@@ -28,13 +28,13 @@ import {
   ImageStyle,
   RefreshControl,
   SafeAreaView,
+  ScrollView,
   Text,
   TextStyle,
   TouchableOpacity,
   View,
   ViewStyle,
 } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
 
 const HomeScreen = () => {
   const { theme } = useTheme();

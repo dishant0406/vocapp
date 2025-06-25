@@ -42,6 +42,14 @@
         {
           "iosUrlScheme": "com.googleusercontent.apps.1095111342894-9a6gi9lfghbr9j74tat0gtcd7uj2ng5g"
         }
+      ],
+      [
+        "onesignal-expo-plugin",
+        {
+          "mode": "development",
+          "smallIcons": ["./assets/images/icon.png"],
+          "largeIcons": ["./assets/images/icon.png"]
+        }
       ]
     ],
     "experiments": {

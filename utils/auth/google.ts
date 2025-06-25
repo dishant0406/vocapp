@@ -11,11 +11,13 @@ export const performGoogleSignIn = async (
   GoogleSignin.configure({
     webClientId: ENV.GOOGLE_WEB_CLIENT_ID,
     iosClientId: ENV.GOOGLE_IOS_CLIENT_ID,
+    offlineAccess: true,
   });
 
   try {
     // Attempt to sign in the user with Google
     await GoogleSignin.hasPlayServices();
+
     const user = await GoogleSignin.signIn();
 
     const response = await fetch(ENV.AUTH_APP_DOMAIN + "/auth/signinup", {

@@ -1,10 +1,10 @@
-import { useAudioPlayer } from "@simform_solutions/react-native-audio-waveform";
-import * as FileSystem from "expo-file-system";
+// store/audioPlayer.ts
 import TrackPlayer, {
   AppKilledPlaybackBehavior,
   Capability,
   State,
   Track,
+  TrackType,
 } from "react-native-track-player";
 import { create } from "zustand";
 import handleApiCall from "../api/apiHandler";
@@ -16,12 +16,9 @@ export interface AudioTrack {
   title: string;
   artist?: string;
   coverImage?: string;
-  localPath?: string;
-  waveformData?: number[][];
 }
 
 interface AudioPlayerState {
-  // Current track and playback state
   currentTrack: AudioTrack | null;
   isPlaying: boolean;
   isLoading: boolean;
@@ -29,11 +26,8 @@ interface AudioPlayerState {
   isShuffled: boolean;
   position: number;
   duration: number;
-
-  // Player setup state
   isPlayerReady: boolean;
 
-  // Actions
   loadTrack: (
     id: string,
     url: string,
@@ -62,20 +56,15 @@ interface AudioPlayerState {
 
 const setupPlayer = async (): Promise<void> => {
   try {
-    await TrackPlayer.setupPlayer({
-      autoHandleInterruptions: true,
-    });
+    await TrackPlayer.setupPlayer({ autoHandleInterruptions: true });
   } catch (error: any) {
     if (
       typeof error?.message === "string" &&
       error.message.includes("already been initialized")
     ) {
-      // Player is already initialized, continue
       return;
-    } else {
-      console.error("Error setting up track player:", error);
-      throw error;
     }
+    throw error;
   }
 
   await TrackPlayer.updateOptions({
@@ -89,18 +78,6 @@ const setupPlayer = async (): Promise<void> => {
   });
 };
 
-const downloadFileToCache = async (url: string): Promise<string> => {
-  const filename = url.split("/").pop() || `audio-${Date.now()}.mp3`;
-  const fileUri = FileSystem.cacheDirectory + filename;
-  const fileInfo = await FileSystem.getInfoAsync(fileUri);
-
-  if (!fileInfo.exists) {
-    const { uri } = await FileSystem.downloadAsync(url, fileUri);
-    return uri;
-  }
-  return fileUri;
-};
-
 export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
   currentTrack: null,
   isPlaying: false,
@@ -111,111 +88,62 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
   duration: 0,
   isPlayerReady: false,
 
-  updateTrackMetadata: (
-    id: string,
-    title?: string,
-    artist?: string,
-    coverImage?: string
-  ) => {
+  updateTrackMetadata: (id, title, artist, coverImage) => {
     const state = get();
-    if (state.currentTrack) {
-      set({
-        currentTrack: {
-          ...state.currentTrack,
-          id: id || state.currentTrack.id,
-          title: title || state.currentTrack.title,
-          artist: artist || state.currentTrack.artist,
-          coverImage: coverImage || state.currentTrack.coverImage,
-        },
-      });
-    }
+    if (!state.currentTrack) return;
+    set({
+      currentTrack: {
+        ...state.currentTrack,
+        id: id || state.currentTrack.id,
+        title: title || state.currentTrack.title,
+        artist: artist || state.currentTrack.artist,
+        coverImage: coverImage || state.currentTrack.coverImage,
+      },
+    });
   },
 
-  // Updated loadTrack function for your Zustand store
-  loadTrack: async (
-    id: string,
-    url: string,
-    title: string = "Audio",
-    artist: string = "",
-    coverImage: string = ""
-  ) => {
+  loadTrack: async (id, url, title = "Audio", artist = "", coverImage = "") => {
     const state = get();
-
-    // If same track is already loaded and ready, don't reload
-    if (
-      state.currentTrack?.url === url &&
-      state.currentTrack.localPath &&
-      !state.isLoading
-    ) {
+    if (state.currentTrack?.url === url && !state.isLoading) {
       return;
     }
-
-    // Prevent concurrent loading of the same URL
     if (state.isLoading && state.currentTrack?.url === url) {
       return;
     }
-
     set({ isLoading: true });
-
     try {
-      // Setup player if not ready
       if (!state.isPlayerReady) {
         await setupPlayer();
         set({ isPlayerReady: true });
       }
 
-      // Download file to cache
-      const localPath = await downloadFileToCache(url);
+      const track: AudioTrack = { id, url, title, artist, coverImage };
 
-      // Extract waveform data
-      const { extractWaveformData } = useAudioPlayer();
-      const waveformData = await extractWaveformData({
-        path: localPath,
-        playerKey: `${url}-${Date.now()}`, // Make key unique to prevent conflicts
-        noOfSamples: 100,
-      });
-
-      const track: AudioTrack = {
-        id,
-        url,
-        title,
-        artist,
-        coverImage,
-        localPath,
-        waveformData,
-      };
-
-      // Reset and add new track
       await TrackPlayer.reset();
       await TrackPlayer.add({
         id: track.id,
-        url: localPath,
+        url: track.url,
         title,
         artist,
+        type: TrackType.HLS,
+        artwork: coverImage || undefined,
       } as Track);
 
-      // Only update state if we're still loading the same URL
-      // This prevents race conditions
-      const currentState = get();
-      if (currentState.isLoading) {
+      const current = get();
+      if (current.isLoading) {
         set({
           currentTrack: track,
           isLoading: false,
           position: 0,
           duration: 0,
         });
-
         handleApiCall(recordEpisodePlay, [id?.split("::")[1]]);
       }
     } catch (error) {
       console.error("Error loading track:", error);
-      // Only update error state if we're still in loading state
-      const currentState = get();
-      if (currentState.isLoading) {
-        set({
-          isLoading: false,
-          currentTrack: null,
-        });
+      const current = get();
+      if (current.isLoading) {
+        set({ isLoading: false, currentTrack: null });
       }
     }
   },
@@ -238,24 +166,21 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
 
   togglePlayPause: async () => {
     const { isPlaying, play, pause } = get();
-    if (isPlaying) {
-      await pause();
-    } else {
-      await play();
-    }
+    if (isPlaying) await pause();
+    else await play();
   },
 
-  seekTo: async (position: number) => {
+  seekTo: async (position) => {
     try {
       const { duration } = get();
-      const clampedPosition = Math.max(0, Math.min(position, duration));
-      await TrackPlayer.seekTo(clampedPosition);
+      const clamped = Math.max(0, Math.min(position, duration));
+      await TrackPlayer.seekTo(clamped);
     } catch (error) {
       console.error("Error seeking:", error);
     }
   },
 
-  seekBy: async (seconds: number) => {
+  seekBy: async (seconds) => {
     const { position, seekTo } = get();
     await seekTo(position + seconds);
   },
@@ -263,29 +188,19 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
   toggleMute: async () => {
     try {
       const { isMuted } = get();
-      const newMutedState = !isMuted;
-      await TrackPlayer.setVolume(newMutedState ? 0 : 1);
-      set({ isMuted: newMutedState });
+      const next = !isMuted;
+      await TrackPlayer.setVolume(next ? 0 : 1);
+      set({ isMuted: next });
     } catch (error) {
       console.error("Error toggling mute:", error);
     }
   },
 
-  toggleShuffle: () => {
-    set((state) => ({ isShuffled: !state.isShuffled }));
-  },
+  toggleShuffle: () => set((s) => ({ isShuffled: !s.isShuffled })),
 
-  setPosition: (position: number) => {
-    set({ position });
-  },
-
-  setDuration: (duration: number) => {
-    set({ duration });
-  },
-
-  setPlaybackState: (state: State) => {
-    set({ isPlaying: state === State.Playing });
-  },
+  setPosition: (position) => set({ position }),
+  setDuration: (duration) => set({ duration }),
+  setPlaybackState: (state) => set({ isPlaying: state === State.Playing }),
 
   reset: async () => {
     try {

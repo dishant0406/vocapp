@@ -4,6 +4,7 @@ import IconButton from "@/components/Reusables/IconButton";
 import Loader from "@/components/Reusables/Loader";
 import handleApiCall from "@/utils/api/apiHandler";
 import { getPodcastById } from "@/utils/api/calls";
+import { useAudioPlayerState } from "@/utils/hooks/audioEvents";
 import useBookmarkStore from "@/utils/store/bookmarkStore";
 import { makeStyles, useTheme } from "@/utils/theme/useTheme";
 import { Podcast } from "@/utils/types/podcast";
@@ -46,6 +47,7 @@ const EpisodePlay = () => {
     useBookmarkStore();
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
+  const { isPlaying } = useAudioPlayerState();
 
   // Memoize the API call function to prevent recreating it on every render
   const fetchPodcast = useCallback(async (id: string) => {
@@ -190,14 +192,14 @@ const EpisodePlay = () => {
         onPress={handleBookmarkToggle}
       />
       <View style={styles.diskContainer}>
-        <Disk isPlaying={false} image={IMAGE} />
+        <Disk isPlaying={isPlaying} image={IMAGE} />
       </View>
       <Text style={styles.title}>{episodeData.title}</Text>
       <AudioPlayer
         id={`${podcastId}::${episodeId}`}
         coverImage={IMAGE}
         title={episodeData.title}
-        url={episodeData.audioUrl}
+        url={episodeData.hlsUrl}
       />
     </SafeAreaView>
   );

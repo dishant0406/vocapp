@@ -1,5 +1,6 @@
 import { ThemeProvider } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { LogLevel, OneSignal } from "react-native-onesignal";
 import SuperTokens from "supertokens-react-native";
 
 import {
@@ -28,6 +29,10 @@ import { useAudioEvents } from "@/utils/hooks/audioEvents";
 import useUserStore from "@/utils/store/userStore";
 import { Toasts } from "@backpackapp-io/react-native-toast";
 
+import Constants from "expo-constants";
+
+const statusBarHeight = Constants.statusBarHeight;
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -42,7 +47,7 @@ export default function RootLayout() {
   const { theme } = useTheme();
   const [appIsReady, setAppIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<Href<string> | null>(null);
-  const { fetchUserProfile } = useUserStore();
+  const { fetchUserProfile, userProfile } = useUserStore();
 
   useEffect(() => {
     async function determineInitialRoute(): Promise<Href<string>> {
@@ -50,6 +55,12 @@ export default function RootLayout() {
       SuperTokens.init({
         apiDomain: ENV.AUTH_APP_DOMAIN,
       });
+
+      // Initialize OneSignal
+      OneSignal.Debug.setLogLevel(LogLevel.Verbose); // Initialize with your OneSignal App ID
+      OneSignal.initialize("aadd98f1-4da4-4294-bb3e-c972320a26f8");
+      // Request push notification permission
+      OneSignal.Notifications.requestPermission(false);
 
       // Task: Authentication Check
       const isLoggedIn = await SuperTokens.doesSessionExist();
@@ -94,6 +105,14 @@ export default function RootLayout() {
     }
   }, [appIsReady, initialRoute, router]); // Effect runs when app is ready and route is determined
 
+  // Effect to login with OneSignal when user profile is available
+  useEffect(() => {
+    if (userProfile?.id) {
+      // Login with OneSignal using the user's ID as external ID
+      OneSignal.login(userProfile.id);
+    }
+  }, [userProfile?.id]);
+
   useAudioEvents();
 
   if (!appIsReady) {
@@ -102,7 +121,13 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? darkTheme : lightTheme}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView
+        style={{
+          flex: 1,
+          paddingTop: statusBarHeight,
+          backgroundColor: theme.colors.background,
+        }}
+      >
         {/* Ensure GestureHandlerRootView fills the screen - removed stray space from here */}
         <Stack
           screenOptions={{

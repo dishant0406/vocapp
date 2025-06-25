@@ -1,9 +1,6 @@
 import { makeStyles, useTheme } from "@/utils/theme/useTheme";
 import { HugeiconsIcon } from "@hugeicons/react-native";
-import Constants from "expo-constants";
 import { TouchableOpacity, ViewStyle } from "react-native";
-
-const statusBarHeight = Constants.statusBarHeight;
 
 const IconButton: React.FC<IconButtonProps> = ({
   icon,
@@ -54,7 +51,7 @@ const IconButton: React.FC<IconButtonProps> = ({
 const madeStyles = makeStyles((theme) => {
   const headerPosition: ViewStyle = {
     position: "absolute",
-    top: theme.vh(2) + statusBarHeight,
+    top: theme.vh(2),
     backgroundColor: theme.colors.tint,
     borderRadius: theme.vw(10),
     padding: theme.vw(4),
