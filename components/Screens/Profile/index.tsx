@@ -1,6 +1,7 @@
 import Header from "@/components/Reusables/Header";
 import { signOut } from "@/utils/api/auth";
 import { USER_AVATAR_IMAGE } from "@/utils/constants";
+import { useAudioPlayerControls } from "@/utils/hooks/audioEvents";
 import useUserStore from "@/utils/store/userStore";
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
@@ -71,6 +72,7 @@ const Profile = () => {
   const { theme } = useTheme();
   const styles = madeStyles(theme);
   const { userProfile } = useUserStore();
+  const { reset } = useAudioPlayerControls();
   const router = useRouter();
 
   const generationLeft =
@@ -132,6 +134,7 @@ const Profile = () => {
               const signout = await signOut();
               if (signout.status === "OK") {
                 router.dismissAll();
+                reset();
                 router.replace("/auth");
               }
             }}

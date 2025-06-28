@@ -16,6 +16,7 @@ export interface AudioTrack {
   title: string;
   artist?: string;
   coverImage?: string;
+  podcastId: string; // Optional, used for metadata updates
 }
 
 interface AudioPlayerState {
@@ -33,10 +34,12 @@ interface AudioPlayerState {
     url: string,
     title?: string,
     artist?: string,
-    coverImage?: string
+    coverImage?: string,
+    podcastId?: string
   ) => Promise<void>;
   updateTrackMetadata: (
     id: string,
+    podcastId: string,
     title?: string,
     artist?: string,
     coverImage?: string
@@ -71,6 +74,7 @@ const setupPlayer = async (): Promise<void> => {
     android: {
       appKilledPlaybackBehavior:
         AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+      alwaysPauseOnInterruption: true,
     },
     capabilities: [Capability.Play, Capability.Pause, Capability.SeekTo],
     compactCapabilities: [Capability.Play, Capability.Pause],
@@ -98,11 +102,19 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
         title: title || state.currentTrack.title,
         artist: artist || state.currentTrack.artist,
         coverImage: coverImage || state.currentTrack.coverImage,
+        podcastId: state.currentTrack.podcastId || "",
       },
     });
   },
 
-  loadTrack: async (id, url, title = "Audio", artist = "", coverImage = "") => {
+  loadTrack: async (
+    id,
+    url,
+    title = "Audio",
+    artist = "",
+    coverImage = "",
+    podcastId = ""
+  ) => {
     const state = get();
     if (state.currentTrack?.url === url && !state.isLoading) {
       return;
@@ -117,7 +129,14 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
         set({ isPlayerReady: true });
       }
 
-      const track: AudioTrack = { id, url, title, artist, coverImage };
+      const track: AudioTrack = {
+        id,
+        url,
+        title,
+        artist,
+        coverImage,
+        podcastId,
+      };
 
       await TrackPlayer.reset();
       await TrackPlayer.add({

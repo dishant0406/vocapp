@@ -29,6 +29,7 @@ type AudioPlayerProps = {
   title?: string;
   artist?: string;
   coverImage?: string;
+  podcastId: string;
   onPlayStateChange?: (isPlaying: boolean) => void;
 };
 
@@ -39,7 +40,10 @@ const formatTime = (sec: number) => {
 };
 
 const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
-  ({ id, url, title, artist, coverImage, onPlayStateChange }, ref) => {
+  (
+    { id, url, title, artist, coverImage, podcastId, onPlayStateChange },
+    ref
+  ) => {
     const {
       currentTrack,
       isPlaying,
@@ -70,7 +74,7 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
 
     useEffect(() => {
       if (url && (!currentTrack || currentTrack.url !== url)) {
-        loadTrack(id, url, title, artist, coverImage);
+        loadTrack(id, url, title, artist, coverImage, podcastId);
       }
     }, [url, currentTrack?.url]);
 
@@ -82,7 +86,7 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
           (coverImage && coverImage !== currentTrack.coverImage) ||
           (id && id !== currentTrack.id)
         ) {
-          updateTrackMetadata(id, title, artist, coverImage);
+          updateTrackMetadata(id, podcastId, title, artist, coverImage);
         }
       }
     }, [title, artist, coverImage, id, url]);

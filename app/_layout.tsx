@@ -1,4 +1,5 @@
 import { ThemeProvider } from "@react-navigation/native";
+import * as Linking from "expo-linking";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { LogLevel, OneSignal } from "react-native-onesignal";
 import SuperTokens from "supertokens-react-native";
@@ -29,6 +30,7 @@ import { useAudioEvents } from "@/utils/hooks/audioEvents";
 import useUserStore from "@/utils/store/userStore";
 import { Toasts } from "@backpackapp-io/react-native-toast";
 
+import { useAudioPlayerStore } from "@/utils/store/audioPlayer";
 import Constants from "expo-constants";
 
 const statusBarHeight = Constants.statusBarHeight;
@@ -48,6 +50,7 @@ export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<Href<string> | null>(null);
   const { fetchUserProfile, userProfile } = useUserStore();
+  const { currentTrack } = useAudioPlayerStore();
 
   useEffect(() => {
     async function determineInitialRoute(): Promise<Href<string>> {
@@ -112,6 +115,20 @@ export default function RootLayout() {
       OneSignal.login(userProfile.id);
     }
   }, [userProfile?.id]);
+
+  useEffect(() => {
+    Linking.addEventListener("url", (event) => {
+      if (event.url === "trackplayer://notification.click") {
+        console.log("currentTrack", currentTrack);
+        if (currentTrack?.id) {
+          router.dismissAll();
+          router.replace(
+            `/podcast/${currentTrack.podcastId}/${currentTrack.id}` as Href
+          );
+        }
+      }
+    });
+  }, [currentTrack?.id]);
 
   useAudioEvents();
 

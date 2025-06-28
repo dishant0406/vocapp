@@ -176,7 +176,9 @@ const EpisodePlay = () => {
       <IconButton
         icon={ArrowLeft01Icon}
         position="leftButton"
-        onPress={() => router.back()}
+        onPress={() =>
+          router.canGoBack() ? router.back() : router.replace("/(tabs)")
+        }
       />
       <IconButton
         icon={CloudDownloadIcon}
@@ -196,10 +198,11 @@ const EpisodePlay = () => {
       </View>
       <Text style={styles.title}>{episodeData.title}</Text>
       <AudioPlayer
-        id={`${podcastId}::${episodeId}`}
+        id={`${episodeId}`}
         coverImage={IMAGE}
         title={episodeData.title}
         url={episodeData.hlsUrl}
+        podcastId={podcastId}
       />
     </SafeAreaView>
   );

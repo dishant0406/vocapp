@@ -1,11 +1,12 @@
 import { useEffect } from "react";
-import {
+import TrackPlayer, {
   Event,
   usePlaybackState,
   useProgress,
   useTrackPlayerEvents,
 } from "react-native-track-player";
 import { useShallow } from "zustand/react/shallow";
+import { PlaybackService } from "../helpers/playBackService";
 import { useAudioPlayerStore } from "../store/audioPlayer";
 
 /**
@@ -35,6 +36,14 @@ export const useAudioEvents = () => {
     setPosition(progress.position);
     setDuration(progress.duration);
   }, [progress.position, progress.duration, setPosition, setDuration]);
+
+  useEffect(() => {
+    TrackPlayer.registerPlaybackService(() => PlaybackService);
+
+    return () => {
+      // Cleanup: Unregister playback service when the component unmounts
+    };
+  }, []);
 
   // Handle TrackPlayer events
   useTrackPlayerEvents(
