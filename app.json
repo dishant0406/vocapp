@@ -19,7 +19,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.dishant.vocapp",
-      "versionCode": 7
+      "versionCode": 8
     },
     "web": {
       "bundler": "metro",

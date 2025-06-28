@@ -46,8 +46,8 @@ const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({ onPress }) => {
   } as ViewStyle;
 
   const handleClick = () => {
-    const [podcastId, episodeId] = currentTrack.id.split("::");
-    const link = `/podcast/${podcastId}/${episodeId}` as Href<string>;
+    const link =
+      `/podcast/${currentTrack.podcastId}/${currentTrack.id}` as Href<string>;
     router.push(link);
   };
 
