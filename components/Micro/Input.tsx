@@ -40,7 +40,7 @@ const Input = forwardRef<TextInput, InputProps>(
       inputStyle,
       labelStyle,
       errorStyle,
-      keyboardAvoidingEnabled = true,
+      keyboardAvoidingEnabled = false,
       ...props
     },
     ref
@@ -86,7 +86,7 @@ const Input = forwardRef<TextInput, InputProps>(
       return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
             style={styles.keyboardAvoidingView}
           >
             {InputComponent}

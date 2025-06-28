@@ -3,7 +3,10 @@ import {
   DefaultTheme,
   Theme as NavigationTheme,
 } from "@react-navigation/native";
+import Constants from "expo-constants";
 import { vh, vw } from "react-native-expo-typescript-viewport-units";
+
+const statusBarHeight = Constants.statusBarHeight;
 
 export interface CustomTheme extends Omit<NavigationTheme, "colors"> {
   colors: NavigationTheme["colors"] & {
@@ -39,6 +42,7 @@ export interface CustomTheme extends Omit<NavigationTheme, "colors"> {
   spacingY: (value: number) => number;
   spacingX: (value: number) => number;
   spacing: (value: number) => number;
+  statusBarHeight: number;
   fontSizes: {
     extraSmall: number;
     small: number;
@@ -81,6 +85,7 @@ const OTHER = {
   spacingY: (value: number) => vh(value),
   spacingX: (value: number) => vw(value),
   spacing: (value: number) => vh(value),
+  statusBarHeight: statusBarHeight,
   fontSizes: {
     extraSmall: vh(1.2),
     small: vh(1.5),

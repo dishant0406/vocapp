@@ -1,5 +1,5 @@
 import Cover from "@/components/Reusables/Cover";
-import IconButton from "@/components/Reusables/IconButton";
+import Header from "@/components/Reusables/Header";
 import Loader from "@/components/Reusables/Loader";
 import NoData from "@/components/Reusables/NoData"; // Added import
 import handleApiCall from "@/utils/api/apiHandler";
@@ -11,17 +11,9 @@ import {
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
 import { Podcast } from "@/utils/types/podcast"; // Ensure Podcast type is imported
-import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-  FlatList,
-  RefreshControl,
-  Text,
-  TextStyle,
-  View,
-  ViewStyle,
-} from "react-native";
+import { FlatList, RefreshControl, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 enum SortType {
@@ -129,14 +121,7 @@ const Podcasts = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <IconButton
-        icon={ArrowLeft01Icon}
-        position="leftButton"
-        onPress={() => router.back()}
-      />
-      <View style={styles.header}>
-        <Text style={styles.title}>{getTitle(sortType, query)}</Text>
-      </View>
+      <Header title={getTitle(sortType, query)} />
       {podcasts.length === 0 ? ( // Check if podcasts array is empty
         <NoData /> // Render NoData component
       ) : (
@@ -177,22 +162,6 @@ const madeStyles = makeStyles((theme) => ({
   container: {
     flex: 1,
   } as ViewStyle,
-
-  header: {
-    paddingHorizontal: theme.vw(4),
-    flexDirection: "row",
-    marginTop: theme.vh(0.5),
-    marginLeft: theme.vw(22),
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: theme.vh(4),
-  } as ViewStyle,
-  title: {
-    fontSize: theme.fontSizes.medium,
-    color: theme.colors.text,
-    fontWeight: "bold",
-    fontFamily: theme.fontFamily.bold,
-  } as TextStyle,
 }));
 
 export default Podcasts;

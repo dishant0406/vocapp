@@ -178,9 +178,9 @@ const madeStyles = makeStyles((theme) => ({
     flex: 1,
   } as ViewStyle,
   header: {
+    paddingTop: 0,
     padding: theme.vw(4),
     flexDirection: "row",
-    marginTop: theme.vh(1.5),
     marginLeft: theme.vw(4),
     alignItems: "center",
     justifyContent: "space-between",

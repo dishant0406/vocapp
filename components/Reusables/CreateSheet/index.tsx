@@ -8,7 +8,6 @@ import { toast } from "@backpackapp-io/react-native-toast";
 import React, { ForwardedRef, forwardRef, useState } from "react";
 import {
   Keyboard,
-  KeyboardAvoidingView,
   StyleSheet,
   Text,
   TextStyle,
@@ -58,7 +57,7 @@ const CreateSheet = forwardRef(
           toast.success(
             "Podcast creation started! We'll notify you when it's ready.",
             {
-              duration: 5000,
+              duration: 1000,
             }
           );
           setTimeout(() => {
@@ -83,14 +82,14 @@ const CreateSheet = forwardRef(
         closable={!loading}
         disableDragBeyondMinimumSnapPoint
         containerStyle={styles.sheetContainer}
+        keyboardHandlerEnabled={false}
       >
-        <KeyboardAvoidingView>
+        <View>
           <View style={styles.titleContainer}>
             <Text style={styles.title}>Create your own podcast</Text>
           </View>
           <Input
             readOnly={loading}
-            keyboardAvoidingEnabled={true}
             placeholder="latest news, tech, or anything else"
             label="Anything in mind?"
             value={topic}
@@ -115,7 +114,7 @@ const CreateSheet = forwardRef(
           >
             Create Podcast
           </Button>
-        </KeyboardAvoidingView>
+        </View>
       </ActionSheet>
     );
   }

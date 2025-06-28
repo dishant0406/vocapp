@@ -4,6 +4,7 @@ import { performGoogleSignIn } from "@/utils/auth/google";
 import useUserStore from "@/utils/store/userStore";
 import { makeStyles, useTheme } from "@/utils/theme/useTheme";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
   Image,
   ImageStyle,
@@ -18,6 +19,7 @@ const Auth = () => {
   const router = useRouter();
   const styles = madeStyles(theme);
   const { fetchUserProfile } = useUserStore();
+  const [loading, setLoading] = useState<boolean>(false);
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
@@ -41,7 +43,11 @@ const Auth = () => {
             </Text>
           </View>
           <Button
-            onPress={() => performGoogleSignIn(router, fetchUserProfile)}
+            disabled={loading}
+            loading={loading}
+            onPress={() =>
+              performGoogleSignIn(router, fetchUserProfile, setLoading)
+            }
             style={styles.loginButton}
           >
             <Text style={styles.loginButtonText}>Sign In with Google</Text>

@@ -1,10 +1,9 @@
-import IconButton from "@/components/Reusables/IconButton";
+import Header from "@/components/Reusables/Header";
 import MiniAudioPlayer from "@/components/Reusables/MiniPlayer";
 import { TERMS_AND_CONDITIONS } from "@/utils/constants";
 import { useAudioPlayerState } from "@/utils/hooks/audioEvents";
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
-import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -39,17 +38,7 @@ const TermsAndConditions = () => {
   return (
     <SafeAreaView style={styles.container}>
       <MiniAudioPlayer />
-      <View style={styles.header}>
-        <IconButton
-          icon={ArrowLeft01Icon}
-          position="leftButton"
-          top={theme.vh(1)}
-          left={theme.vw(3)}
-          onPress={() => router.back()}
-        />
-        <Text style={styles.headerTitle}>{termsData.title}</Text>
-        <View style={styles.placeholderView} />
-      </View>
+      <Header title={termsData.title} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -89,25 +78,9 @@ const madeStyles = makeStyles(
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
+      paddingTop: theme.statusBarHeight,
     } as ViewStyle,
-    header: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      paddingVertical: theme.vh(2),
-      paddingBottom: theme.vh(3),
-    } as ViewStyle,
-    backButton: {
-      padding: theme.vw(2),
-    } as ViewStyle,
-    headerTitle: {
-      fontSize: theme.fontSizes.medium,
-      fontFamily: theme.fontFamily.bold,
-      color: theme.colors.text,
-    } as TextStyle,
-    placeholderView: {
-      width: theme.vw(10),
-    } as ViewStyle,
+
     scrollContainer: {
       padding: theme.vw(4),
       paddingBottom: theme.vh(isPlaying ? 10 : 6),

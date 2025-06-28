@@ -8,7 +8,6 @@ import { toast } from "@backpackapp-io/react-native-toast";
 import React, { ForwardedRef, forwardRef, useState } from "react";
 import {
   Keyboard,
-  KeyboardAvoidingView,
   StyleSheet,
   Text,
   TextStyle,
@@ -64,7 +63,7 @@ const CreateEpisodeSheet = forwardRef(
             toast.success(
               "Episode creation started! We'll notify you when it's ready.",
               {
-                duration: 5000,
+                duration: 1000,
               }
             );
             setTimeout(() => {
@@ -90,14 +89,14 @@ const CreateEpisodeSheet = forwardRef(
         closable={!loading}
         disableDragBeyondMinimumSnapPoint
         containerStyle={styles.sheetContainer}
+        keyboardHandlerEnabled={false}
       >
-        <KeyboardAvoidingView>
+        <View>
           <View style={styles.titleContainer}>
             <Text style={styles.title}>Add New Episode</Text>
           </View>
           <Input
             readOnly={loading}
-            keyboardAvoidingEnabled={true}
             placeholder="Add a topic or leave empty"
             label="Something in mind? (Optional)"
             value={topic}
@@ -122,7 +121,7 @@ const CreateEpisodeSheet = forwardRef(
           >
             Add Episode
           </Button>
-        </KeyboardAvoidingView>
+        </View>
       </ActionSheet>
     );
   }

@@ -1,4 +1,5 @@
 import { ENV } from "@/constants/variables";
+import { toast } from "@backpackapp-io/react-native-toast";
 import { GoogleSignin, User } from "@react-native-google-signin/google-signin";
 import { Router } from "expo-router";
 import SuperTokens from "supertokens-react-native";
@@ -6,7 +7,8 @@ import { apiClient } from "../api/client";
 
 export const performGoogleSignIn = async (
   router: Router,
-  fetchUserProfile: () => Promise<void>
+  fetchUserProfile: () => Promise<void>,
+  setLoading: (loading: boolean) => void
 ): Promise<boolean> => {
   GoogleSignin.configure({
     webClientId: ENV.GOOGLE_WEB_CLIENT_ID,
@@ -14,7 +16,16 @@ export const performGoogleSignIn = async (
     offlineAccess: true,
   });
 
+  setLoading(true);
+
   try {
+    // Check if user is currently signed in and sign them out first
+    // This forces the account selection dialog to appear
+    const isSignedIn = await GoogleSignin.isSignedIn();
+    if (isSignedIn) {
+      await GoogleSignin.signOut();
+    }
+
     // Attempt to sign in the user with Google
     await GoogleSignin.hasPlayServices();
 
@@ -50,13 +61,17 @@ export const performGoogleSignIn = async (
     return true;
   } catch (e) {
     const error = await e;
-    console.error(
+    console.log(
       "Google sign in failed with error",
       JSON.stringify(error, null, 2)
     );
+    toast.error("Failed to sign in with Google. Please try again later.", {
+      duration: 5000,
+    });
+    return false;
+  } finally {
+    setLoading(false);
   }
-
-  return false;
 };
 
 export const getCurrentUser = async (): Promise<User | null> => {

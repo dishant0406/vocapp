@@ -38,7 +38,7 @@ import {
 
 const HomeScreen = () => {
   const { theme } = useTheme();
-  const { currentTrack, isPlaying } = useAudioPlayerState();
+  const { currentTrack } = useAudioPlayerState();
   const { dashboardData, fetchDashboard } = useDashboardStore();
   const { userProfile } = useUserStore();
 
@@ -152,28 +152,29 @@ const HomeScreen = () => {
             />
           }
         >
-          {!isPlaying && dashboardData?.recentlyPlayedEpisodes?.[0]?.id && (
-            <View style={styles.recentContainer}>
-              <Text style={styles.sectionTitle}>Recently Played</Text>
-              <EpisodeCard
-                playIcon
-                link={`/podcast/${dashboardData.recentlyPlayedEpisodes[0].podcastId}/${dashboardData.recentlyPlayedEpisodes[0].id}`}
-                imageType="square"
-                noBackground
-                episode={
-                  {
-                    ...dashboardData.recentlyPlayedEpisodes[0],
-                    description:
-                      dashboardData.recentlyPlayedEpisodes[0].podcastTitle ||
-                      "",
-                  } as unknown as Episode
-                }
-                imageUrl={
-                  dashboardData.recentlyPlayedEpisodes[0].coverImage || ""
-                }
-              />
-            </View>
-          )}
+          {!currentTrack?.url &&
+            dashboardData?.recentlyPlayedEpisodes?.[0]?.id && (
+              <View style={styles.recentContainer}>
+                <Text style={styles.sectionTitle}>Recently Played</Text>
+                <EpisodeCard
+                  playIcon
+                  link={`/podcast/${dashboardData.recentlyPlayedEpisodes[0].podcastId}/${dashboardData.recentlyPlayedEpisodes[0].id}`}
+                  imageType="square"
+                  noBackground
+                  episode={
+                    {
+                      ...dashboardData.recentlyPlayedEpisodes[0],
+                      description:
+                        dashboardData.recentlyPlayedEpisodes[0].podcastTitle ||
+                        "",
+                    } as unknown as Episode
+                  }
+                  imageUrl={
+                    dashboardData.recentlyPlayedEpisodes[0].coverImage || ""
+                  }
+                />
+              </View>
+            )}
           {dashboardData?.recentPodcasts &&
             dashboardData.recentPodcasts.length > 0 && (
               <PodcastSection

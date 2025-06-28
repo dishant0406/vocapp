@@ -1,3 +1,4 @@
+import Header from "@/components/Reusables/Header";
 import { signOut } from "@/utils/api/auth";
 import { USER_AVATAR_IMAGE } from "@/utils/constants";
 import useUserStore from "@/utils/store/userStore";
@@ -6,10 +7,9 @@ import { useTheme } from "@/utils/theme/useTheme";
 import {
   AlertSquareIcon,
   ArrowRight01Icon,
-  Crown03Icon,
   Login03Icon,
   Message01Icon,
-  Settings04Icon,
+  PodcastIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useRouter } from "expo-router";
@@ -29,9 +29,10 @@ type OptionProps = {
   icon: React.ReactNode;
   title: string;
   onPress: () => void;
+  data?: string | number;
 };
 
-const Option = ({ icon, title, onPress }: OptionProps) => {
+const Option = ({ icon, title, onPress, data }: OptionProps) => {
   const { theme } = useTheme();
   const styles = madeStyles(theme);
   return (
@@ -49,12 +50,19 @@ const Option = ({ icon, title, onPress }: OptionProps) => {
         />
         <Text style={styles.optionText}>{title}</Text>
       </View>
-      <HugeiconsIcon
-        icon={ArrowRight01Icon}
-        color={theme.colors.text}
-        style={styles.optionIcon}
-        size={theme.vw(8)}
-      />
+      {!data && (
+        <HugeiconsIcon
+          icon={ArrowRight01Icon}
+          color={theme.colors.text}
+          style={styles.optionIcon}
+          size={theme.vw(8)}
+        />
+      )}
+      {data && (
+        <Text style={[styles.optionText, { paddingRight: theme.vw(2) }]}>
+          {typeof data === "number" ? data.toString() : data}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };
@@ -64,9 +72,16 @@ const Profile = () => {
   const styles = madeStyles(theme);
   const { userProfile } = useUserStore();
   const router = useRouter();
+
+  const generationLeft =
+    (userProfile?.podcastLimit || 0) - (userProfile?.podcastsGenerated || 0) ||
+    0;
+
   return (
-    <SafeAreaView>
-      <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <Header title="Profile" />
+
+      <View style={styles.screenContainer}>
         <View style={styles.header}>
           <View style={styles.textContainer}>
             <Image
@@ -85,15 +100,16 @@ const Profile = () => {
         </View>
         <View style={styles.optionsContainer}>
           <Option
-            icon={Crown03Icon}
-            title="My Subscription"
+            icon={PodcastIcon}
+            title={"Podcast Limit"}
             onPress={() => {}}
+            data={`${generationLeft || 0} / ${userProfile?.podcastLimit || 0}`}
           />
-          <Option
+          {/* <Option
             icon={Settings04Icon}
             title="App Settings"
             onPress={() => {}}
-          />
+          /> */}
           {/* <Option
             icon={Share07Icon}
             title="Invite Friends"
@@ -131,7 +147,13 @@ export default Profile;
 const madeStyles = makeStyles((theme) => {
   return {
     container: {
-      padding: theme.vw(4),
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      paddingTop: theme.statusBarHeight,
+    } as ViewStyle,
+
+    screenContainer: {
+      paddingHorizontal: theme.vw(4),
     },
     avatar: {
       width: theme.vw(13),

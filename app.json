@@ -18,7 +18,8 @@
         "backgroundColor": "#111111"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.dishant.vocapp"
+      "package": "com.dishant.vocapp",
+      "versionCode": 7
     },
     "web": {
       "bundler": "metro",
@@ -47,13 +48,42 @@
         "onesignal-expo-plugin",
         {
           "mode": "development",
-          "smallIcons": ["./assets/images/icon.png"],
-          "largeIcons": ["./assets/images/icon.png"]
+          "smallIcons": [
+            "./assets/images/icon.png"
+          ],
+          "largeIcons": [
+            "./assets/images/icon.png"
+          ]
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "OneSignalNotificationServiceExtension",
+                  "bundleIdentifier": "com.dishant.vocapp.OneSignalNotificationServiceExtension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.dishant.vocapp.onesignal"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "b2a88226-aac4-4057-b213-77db67317e32"
+      }
     }
   }
 }
