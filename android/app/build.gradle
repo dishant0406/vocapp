@@ -114,7 +114,7 @@ android {
         applicationId 'com.dishant.vocapp'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 8
+        versionCode 12
         versionName "1.0.0"
     }
     signingConfigs {
