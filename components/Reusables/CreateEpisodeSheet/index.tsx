@@ -58,6 +58,7 @@ const CreateEpisodeSheet = forwardRef(
         addEpisodeToPodcast,
         [podcastId, searchQuery, selectedDuration],
         {
+          showErrorToast: true,
           onSuccess: () => {
             fetchDashboard();
             toast.success(
@@ -71,7 +72,7 @@ const CreateEpisodeSheet = forwardRef(
             }, 500);
           },
           setLoading: setLoading,
-          onError: (error) => {
+          onError: (error, message, rawError) => {
             setError(error || "Failed to create episode");
           },
         }

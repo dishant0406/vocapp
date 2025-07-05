@@ -36,7 +36,7 @@ export interface Episode {
   hlsUrl: string;
   transcript: string;
   searchQuery: string;
-  status: "ready" | "processing" | "error" | "pending"; // Based on "ready", assuming other statuses
+  status: EpisodeStatus; // Assuming this is an enum or string
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
 }
@@ -60,7 +60,7 @@ export interface Podcast {
 // Optional: More specific status enums if you want stricter typing
 export enum EpisodeStatus {
   READY = "ready",
-  PROCESSING = "processing",
+  PROCESSING = "generating",
   ERROR = "error",
   PENDING = "pending",
 }

@@ -1,18 +1,10 @@
-type Episode = {
-  id: string;
-  name: string;
-  duration: number;
-  description: string;
-  imageUrl?: string;
-};
-
-type Podcast = {
-  id: string;
-  name: string;
-  imageUrl: string;
-  duration: number;
-  description: string;
-  episodes: Episode[];
-};
-
 declare module "@hugeicons/core-free-icons";
+
+declare global {
+  namespace AppTypes {
+    export * from "@/utils/types/podcast";
+    export * from "@/utils/types/bookmark";
+    export * from "@/utils/types/dashboard";
+    export * from "@/utils/types/user";
+  }
+}

@@ -5,11 +5,12 @@ import {
 } from "@/utils/hooks/audioEvents";
 import { makeStyles, useTheme } from "@/utils/theme/useTheme";
 import {
+  Bookmark01Icon,
+  BookmarkAdd01Icon,
   GoBackward10SecIcon,
   GoForward10SecIcon,
   PauseIcon,
   PlayIcon,
-  ShuffleSquareIcon,
   VolumeHighIcon,
   VolumeMute02Icon,
 } from "@hugeicons/core-free-icons";
@@ -31,6 +32,9 @@ type AudioPlayerProps = {
   coverImage?: string;
   podcastId: string;
   onPlayStateChange?: (isPlaying: boolean) => void;
+  isBookmarked?: boolean;
+  onBookmarkToggle?: () => void;
+  bookmarkLoading?: boolean;
 };
 
 const formatTime = (sec: number) => {
@@ -41,7 +45,18 @@ const formatTime = (sec: number) => {
 
 const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
   (
-    { id, url, title, artist, coverImage, podcastId, onPlayStateChange },
+    {
+      id,
+      url,
+      title,
+      artist,
+      coverImage,
+      podcastId,
+      onPlayStateChange,
+      isBookmarked = false,
+      onBookmarkToggle,
+      bookmarkLoading = false,
+    },
     ref
   ) => {
     const {
@@ -144,11 +159,14 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(
               size={28}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={toggleShuffle}>
+          <TouchableOpacity
+            onPress={onBookmarkToggle}
+            disabled={bookmarkLoading}
+          >
             <HugeiconsIcon
-              icon={ShuffleSquareIcon}
+              icon={isBookmarked ? Bookmark01Icon : BookmarkAdd01Icon}
               color={
-                isShuffled ? theme.colors.accentForeground : theme.colors.text
+                isBookmarked ? theme.colors.accentForeground : theme.colors.text
               }
               size={28}
             />

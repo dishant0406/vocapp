@@ -1,6 +1,7 @@
 import { makeStyles } from "@/utils/theme/makeStyles";
 import { useTheme } from "@/utils/theme/useTheme";
 import { Episode } from "@/utils/types/podcast";
+import { toast } from "@backpackapp-io/react-native-toast";
 import { PlayCircleIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { Href, usePathname, useRouter } from "expo-router";
@@ -31,7 +32,16 @@ const EpisodeCard = ({
   const router = useRouter();
   const pathname = usePathname();
 
+  const isGenerating = episode.status === "generating";
+
   const handleClick = () => {
+    if (isGenerating) {
+      toast.error(
+        "This episode is still being generated. Please wait until it's ready."
+      );
+      return;
+    }
+
     const link = (pathname + `/` + episode.id) as Href<string>;
     router.push((goToLink || link) as Href<string>);
   };

@@ -38,7 +38,8 @@ const SinglePodcast: React.FC = () => {
   const sheetRef = useRef<ActionSheetRef>(null);
 
   // Bookmark functionality
-  const { addBookmark, removeBookmark, isItemBookmarked, checkBookmarkStatus } = useBookmarkStore();
+  const { addBookmark, removeBookmark, isItemBookmarked, checkBookmarkStatus } =
+    useBookmarkStore();
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
 
@@ -166,8 +167,6 @@ const madeStyles = makeStyles((theme) => {
       right: 0,
       height: theme.vh(40),
       backgroundColor: theme.colors.background,
-      borderTopLeftRadius: theme.vw(10),
-      borderTopRightRadius: theme.vw(10),
       opacity: 0.2,
     } as ViewStyle,
     title: {

@@ -9,12 +9,7 @@ import useBookmarkStore from "@/utils/store/bookmarkStore";
 import { makeStyles, useTheme } from "@/utils/theme/useTheme";
 import { Podcast } from "@/utils/types/podcast";
 import { toast } from "@backpackapp-io/react-native-toast";
-import {
-  ArrowLeft01Icon,
-  Bookmark01Icon,
-  BookmarkAdd01Icon,
-  CloudDownloadIcon,
-} from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { SafeAreaView, Text, TextStyle, View, ViewStyle } from "react-native";
@@ -180,19 +175,13 @@ const EpisodePlay = () => {
           router.canGoBack() ? router.back() : router.replace("/(tabs)")
         }
       />
-      <IconButton
+      {/* <IconButton
         icon={CloudDownloadIcon}
         position="rightButton"
         onPress={() => {
           // Add download functionality here
         }}
-      />
-      <IconButton
-        icon={isBookmarked ? Bookmark01Icon : BookmarkAdd01Icon}
-        position="rightButton"
-        right={theme.vw(25)}
-        onPress={handleBookmarkToggle}
-      />
+      /> */}
       <View style={styles.diskContainer}>
         <Disk isPlaying={isPlaying} image={IMAGE} />
       </View>
@@ -203,6 +192,9 @@ const EpisodePlay = () => {
         title={episodeData.title}
         url={episodeData.hlsUrl}
         podcastId={podcastId}
+        isBookmarked={isBookmarked}
+        onBookmarkToggle={handleBookmarkToggle}
+        bookmarkLoading={bookmarkLoading}
       />
     </SafeAreaView>
   );

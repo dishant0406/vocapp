@@ -11,13 +11,18 @@ import {
 } from "@hugeicons/core-free-icons";
 
 import CreateSheet from "@/components/Reusables/CreateSheet";
+import { LOADER_LOTTIE } from "@/utils/constants";
 import { useAudioPlayerState } from "@/utils/hooks/audioEvents";
+import useDashboardStore from "@/utils/store/dashboardStore";
 import { makeStyles, useTheme } from "@/utils/theme/useTheme";
+import { toast } from "@backpackapp-io/react-native-toast";
+import LottieView from "lottie-react-native";
 import { TouchableOpacity, ViewStyle } from "react-native";
 import { ActionSheetRef } from "react-native-actions-sheet";
 
 export default function TabLayout() {
   const { theme } = useTheme();
+  const { dashboardData } = useDashboardStore();
   const { currentTrack } = useAudioPlayerState();
   const sheetRef = useRef<ActionSheetRef>(null);
   const styles = madeStyles(theme, {
@@ -50,13 +55,34 @@ export default function TabLayout() {
             tabBarButton: () => (
               <TouchableOpacity
                 onPress={() => {
+                  if (dashboardData?.hasGeneratingEpisodes) {
+                    toast.error(
+                      "You have ongoing episode generation. Please wait until it's complete."
+                    );
+                    return;
+                  }
                   if (sheetRef.current) {
                     sheetRef.current.show();
                   }
                 }}
-                style={styles.createButton}
+                style={[styles.createButton] as ViewStyle}
               >
-                <TabBarIcon color={theme.colors.text} icon={PodcastIcon} />
+                {!dashboardData?.hasGeneratingEpisodes && (
+                  <TabBarIcon color={theme.colors.text} icon={PodcastIcon} />
+                )}
+                {dashboardData?.hasGeneratingEpisodes && (
+                  <LottieView
+                    source={{
+                      uri: LOADER_LOTTIE,
+                    }}
+                    autoPlay
+                    loop
+                    style={{
+                      width: theme.vh(8),
+                      height: theme.vh(8),
+                    }}
+                  />
+                )}
               </TouchableOpacity>
             ),
           }}

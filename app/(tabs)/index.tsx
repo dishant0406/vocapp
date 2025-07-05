@@ -21,8 +21,8 @@ import {
   Podcast as PodcastModel,
   User as UserModel,
 } from "@/utils/types/podcast";
-import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Image,
   ImageStyle,
@@ -47,7 +47,10 @@ const HomeScreen = () => {
   });
   const router = useRouter();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [showTopicPodcasts, setShowTopicPodcasts] = useState(false); // New state
+  const [showTopicPodcasts, setShowTopicPodcasts] = useState(false);
+  // Remove isPolling state and just use the ref for tracking
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isScreenFocused = useRef(true); // Track whether screen is focused
 
   const transformToPodcastModel = useCallback(
     (
@@ -101,6 +104,68 @@ const HomeScreen = () => {
     fetchDashboard();
   }, [fetchDashboard]);
 
+  // Add focus/blur effect to handle tab navigation
+  useFocusEffect(
+    useCallback(() => {
+      console.log("Screen focused");
+      isScreenFocused.current = true;
+
+      // Start polling if needed and not already polling
+      if (dashboardData?.hasGeneratingEpisodes && !pollingIntervalRef.current) {
+        console.log(
+          "Screen focused and episodes generating - starting polling"
+        );
+        pollingIntervalRef.current = setInterval(() => {
+          console.log("Polling dashboard data (focus-based)...");
+          fetchDashboard();
+        }, 5000);
+      }
+
+      // Cleanup when screen loses focus - always stop polling when leaving the screen
+      return () => {
+        console.log("Screen blurred - stopping polling");
+        isScreenFocused.current = false;
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
+      };
+    }, [dashboardData?.hasGeneratingEpisodes, fetchDashboard])
+  );
+
+  // Single useEffect to handle polling based on hasGeneratingEpisodes
+  useEffect(() => {
+    // Only manage polling when screen is focused
+    if (!isScreenFocused.current) return;
+
+    // Clear existing interval
+    if (pollingIntervalRef.current) {
+      console.log("Clearing existing polling interval");
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+
+    // Start new interval if episodes are generating
+    if (dashboardData?.hasGeneratingEpisodes) {
+      console.log("Episodes generating - starting polling");
+      pollingIntervalRef.current = setInterval(() => {
+        console.log("Polling dashboard data...");
+        fetchDashboard();
+      }, 5000);
+    } else {
+      console.log("Episodes not generating, no polling needed");
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (pollingIntervalRef.current) {
+        console.log("Cleanup: Clearing polling interval");
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, [dashboardData?.hasGeneratingEpisodes, fetchDashboard]);
+
   const onRefreshDashboard = useCallback(async () => {
     setIsRefreshing(true);
     await fetchDashboard();
@@ -120,6 +185,11 @@ const HomeScreen = () => {
             Hey {userProfile?.name?.split(" ")?.[0]}! 👋
           </Text>
           <Text style={styles.subtitle}>Listen to your favorite podcasts.</Text>
+          {dashboardData?.hasGeneratingEpisodes && (
+            <Text style={styles.generatingText}>
+              Episodes are being generated... ⏳
+            </Text>
+          )}
         </View>
         <TouchableOpacity activeOpacity={0.7} onPress={handleProfileClick}>
           <Image
@@ -254,5 +324,11 @@ const madeStyles = makeStyles(
       height: theme.vw(13),
       borderRadius: theme.vw(13),
     } as ImageStyle,
+    generatingText: {
+      fontSize: theme.fontSizes.extraSmall || theme.fontSizes.small,
+      color: theme.colors.primary,
+      marginTop: theme.vh(0.5),
+      fontFamily: theme.fontFamily.regular,
+    } as TextStyle,
   })
 );

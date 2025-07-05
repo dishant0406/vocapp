@@ -37,6 +37,7 @@ export type DashboardDataApiResponse = {
   mostViewedPodcasts: PodcastWithPlayCountApiResponse[];
   allTopics: TopicApiResponse[];
   recentlyPlayedEpisodes?: RecentlyPlayedEpisodeApiResponse[];
+  hasGeneratingEpisodes: boolean;
 };
 
 export type DashboardApiResponse = {

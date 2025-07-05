@@ -20,8 +20,6 @@ import { useEffect, useState } from "react";
 
 import "react-native-reanimated";
 
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { darkTheme, lightTheme } from "@/utils/theme/theme";
 import { useTheme } from "@/utils/theme/useTheme";
 
 import { ENV } from "@/constants/variables";
@@ -32,13 +30,13 @@ import { Toasts } from "@backpackapp-io/react-native-toast";
 
 import { useAudioPlayerStore } from "@/utils/store/audioPlayer";
 import Constants from "expo-constants";
+import { StatusBar } from "expo-status-bar";
 
 const statusBarHeight = Constants.statusBarHeight;
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const router = useRouter();
   const [fontsLoaded, fontError] = useFonts({
     PlusJakartaSans_400Regular,
@@ -119,7 +117,6 @@ export default function RootLayout() {
   useEffect(() => {
     Linking.addEventListener("url", (event) => {
       if (event.url === "trackplayer://notification.click") {
-        console.log("currentTrack", currentTrack);
         if (currentTrack?.id) {
           router.dismissAll();
           router.replace(
@@ -137,7 +134,8 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? darkTheme : lightTheme}>
+    <ThemeProvider value={theme}>
+      <StatusBar style="light" />
       <GestureHandlerRootView
         style={{
           flex: 1,
@@ -156,6 +154,7 @@ export default function RootLayout() {
           <Stack.Screen name="+not-found" />
         </Stack>
         <Toasts
+          fixAndroidInsets
           defaultStyle={{
             view: {
               backgroundColor: theme.colors.background,

@@ -1,3 +1,5 @@
+import { toast } from "@backpackapp-io/react-native-toast";
+
 /**
  * Handles API calls with standardized error management and state control
  * @param apiCallFn - A function that returns the Promise from an API call (fetch, axios, etc.)
@@ -256,26 +258,31 @@ const handleApiCall = async <T = any, TArgs extends any[] = any[]>(
     let errorMessage: string | undefined;
 
     if (error) {
-      if (error.isFetchError || error.isAxiosError) {
-        // Custom flags for our structured errors
-        errorCode = error.code;
-        errorMessage = error.message;
-      } else if (error.response) {
-        // Axios specific error structure
+      // **FIXED LOGIC STARTS HERE**
+      // Prioritize checking for error.response, which contains the server's reply.
+      // This is the standard and most reliable way to handle Axios HTTP errors.
+      if (error.response) {
+        const responseData = error.response.data; // The JSON payload from your server
+        const responseStatus = error.response.status;
+
+        // Extract the specific message from the server's JSON response
+        errorMessage = responseData?.message || error.message || "Server error";
+
         errorCode =
-          error.response.status?.toString() || error.response.data?.code;
-        errorMessage =
-          error.response.data?.message || error.message || "Server error";
+          responseData?.code ||
+          responseStatus?.toString() ||
+          error.code || // Fallback to Axios code (e.g., 'ERR_BAD_REQUEST')
+          "SERVER_ERROR";
       } else if (error.request) {
-        // Network error (e.g., axios)
+        // The request was made but no response was received (e.g., network error)
         errorCode = "NETWORK_ERROR";
         errorMessage = "Network request failed. Please check your connection.";
-      } else if (error.code && error.message) {
-        // Custom error (like TIMEOUT) or already processed error
+      } else if (error.code === "TIMEOUT") {
+        // Custom timeout error from within our handler
         errorCode = error.code;
         errorMessage = error.message;
       } else {
-        // Plain error object or string
+        // Any other error (e.g., a setup error in the request, or a plain JS error)
         errorCode = error.code || "UNKNOWN_ERROR";
         errorMessage =
           error.message ||
@@ -288,19 +295,13 @@ const handleApiCall = async <T = any, TArgs extends any[] = any[]>(
 
     if (showErrorToast) {
       // Replace with your actual toast notification mechanism
-      console.error(
-        `Toast: [${errorCode}] ${errorMessage} (Duration: ${errorToastDuration}ms)`
-      );
-      // e.g., toast.error(errorMessage, { duration: errorToastDuration });
+      toast.error(errorMessage || "", { duration: errorToastDuration });
     }
 
     if (onError) {
       onError(errorCode, errorMessage, error);
     }
-    // Do not re-throw here unless you want the caller of handleApiCall to also try/catch
-    // The function is expected to handle errors internally via onError.
-    // If re-throwing is desired, ensure the return type reflects potential throw.
-    // For now, returning null on unrecoverable error after retries.
+
     return null;
   } finally {
     if (setLoading) {

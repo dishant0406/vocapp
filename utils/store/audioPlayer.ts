@@ -156,7 +156,7 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
           position: 0,
           duration: 0,
         });
-        handleApiCall(recordEpisodePlay, [id?.split("::")[1]]);
+        handleApiCall(recordEpisodePlay, [id]);
       }
     } catch (error) {
       console.error("Error loading track:", error);

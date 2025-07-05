@@ -60,10 +60,12 @@ const CreateSheet = forwardRef(
               duration: 1000,
             }
           );
+
           setTimeout(() => {
             handleClose();
           }, 500);
         },
+        showErrorToast: true,
         setLoading: setLoading,
         onError: (error) => {
           setError(error || "Failed to create podcast");

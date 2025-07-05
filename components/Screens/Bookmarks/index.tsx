@@ -8,7 +8,8 @@ import { Podcast } from "@/utils/types/podcast";
 import { toast } from "@backpackapp-io/react-native-toast";
 import { Bookmark01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   RefreshControl,
@@ -75,9 +76,11 @@ const BookmarksScreen = () => {
         index === self.findIndex((t) => t.podcastId === item.podcastId)
     );
 
-  useEffect(() => {
-    fetchBookmarks();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchBookmarks();
+    }, [])
+  );
 
   useEffect(() => {
     setLoading(isLoading);
