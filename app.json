@@ -25,7 +25,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.dishant.vocapp",
-      "versionCode": 12
+      "versionCode": 19
     },
     "web": {
       "bundler": "metro",
@@ -60,6 +60,19 @@
           "largeIcons": [
             "./assets/icons/android.png"
           ]
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
+          },
+          "ios": {
+            "deploymentTarget": "15.1"
+          }
         }
       ]
     ],
