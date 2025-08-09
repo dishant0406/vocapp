@@ -11,6 +11,7 @@ import {
   Login03Icon,
   Message01Icon,
   PodcastIcon,
+  Settings04Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { useRouter } from "expo-router";
@@ -107,11 +108,11 @@ const Profile = () => {
             onPress={() => {}}
             data={`${generationLeft || 0} / ${userProfile?.podcastLimit || 0}`}
           />
-          {/* <Option
+          <Option
             icon={Settings04Icon}
             title="App Settings"
-            onPress={() => {}}
-          /> */}
+            onPress={() => router.push("/settings")}
+          />
           {/* <Option
             icon={Share07Icon}
             title="Invite Friends"

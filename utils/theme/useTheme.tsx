@@ -1,13 +1,23 @@
 import { useColorScheme } from "@/hooks/useColorScheme";
+import useThemeStore from "../store/themeStore";
 import { darkTheme, lightTheme } from "./theme";
 
 export { makeStyles } from "./makeStyles";
 
 export const useTheme = () => {
-  const colorScheme = useColorScheme();
+  const systemColorScheme = useColorScheme();
+  const { themeMode } = useThemeStore();
+
+  const getEffectiveTheme = () => {
+    if (themeMode === "system") {
+      return systemColorScheme === "dark" ? darkTheme : lightTheme;
+    }
+    return themeMode === "dark" ? darkTheme : lightTheme;
+  };
 
   return {
-    theme: colorScheme === "dark" ? darkTheme : lightTheme,
-    // theme: darkTheme, // Force dark theme for now
+    theme: getEffectiveTheme(),
+    themeMode,
+    systemColorScheme,
   };
 };

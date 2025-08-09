@@ -1,5 +1,6 @@
 import { ThemeProvider } from "@react-navigation/native";
 import * as Linking from "expo-linking";
+import * as NavigationBar from "expo-navigation-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { LogLevel, OneSignal } from "react-native-onesignal";
 import SuperTokens from "supertokens-react-native";
@@ -29,6 +30,7 @@ import useUserStore from "@/utils/store/userStore";
 import { Toasts } from "@backpackapp-io/react-native-toast";
 
 import { useAudioPlayerStore } from "@/utils/store/audioPlayer";
+import useThemeStore from "@/utils/store/themeStore";
 import Constants from "expo-constants";
 import { StatusBar } from "expo-status-bar";
 
@@ -38,13 +40,14 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const router = useRouter();
+  const { themeMode } = useThemeStore();
   const [fontsLoaded, fontError] = useFonts({
     PlusJakartaSans_400Regular,
     PlusJakartaSans_500Medium,
     PlusJakartaSans_700Bold,
     PlusJakartaSans_800ExtraBold,
   });
-  const { theme } = useTheme();
+  const { theme, systemColorScheme } = useTheme();
   const [appIsReady, setAppIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState<Href<string> | null>(null);
   const { fetchUserProfile, userProfile } = useUserStore();
@@ -127,6 +130,19 @@ export default function RootLayout() {
     });
   }, [currentTrack?.id]);
 
+  useEffect(() => {
+    NavigationBar.setBackgroundColorAsync(theme.colors.tint);
+    if (themeMode !== "system") {
+      NavigationBar.setButtonStyleAsync(
+        themeMode === "dark" ? "light" : "dark"
+      );
+    } else {
+      NavigationBar.setButtonStyleAsync(
+        systemColorScheme === "dark" ? "light" : "dark"
+      );
+    }
+  }, [themeMode]);
+
   useAudioEvents();
 
   if (!appIsReady) {
@@ -135,7 +151,15 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={theme}>
-      <StatusBar style="auto" />
+      <StatusBar
+        style={
+          themeMode === "system"
+            ? "auto"
+            : themeMode === "dark"
+            ? "light"
+            : "dark"
+        }
+      />
       <GestureHandlerRootView
         style={{
           flex: 1,
