@@ -162,7 +162,7 @@ const madeStyles = makeStyles((theme) => {
       height: theme.vh(7),
       borderRadius: theme.vw(10),
       marginTop: theme.vh(4),
-      backgroundColor: theme.colors.background,
+      backgroundColor: theme.colors.tag,
     },
   });
 });

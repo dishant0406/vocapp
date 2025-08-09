@@ -127,32 +127,34 @@ export const lightTheme: CustomTheme = {
   dark: false,
   colors: {
     // NavigationTheme required colors
-    primary: "#171717",
-    background: "#FFFFFF",
-    card: "#FFFFFF",
-    text: "#1f1501",
-    border: "#E5E5E5",
-    notification: "#EF4444",
-    tint: "#FFFFFF",
+    primary: "#3A3A3A", // Deeper, richer gray
+    background: "#F2F2F2", // Neutral light gray, no yellow tint
+    card: "#F8F8F8", // Clean light gray for cards
+    text: "#2D2D2D", // Dark charcoal text
+    border: "#D4D4D4", // Clean neutral border
+    notification: "#B91C1C", // Deeper red
+    tint: "#F5F5F5", // Clean neutral tint
 
-    // Custom colors
-    foreground: "#1f1501",
-    cardForeground: "#1f1501",
-    popover: "#FFFFFF",
-    tag: "#bfb4ff",
-    popoverForeground: "#1f1501",
-    primaryForeground: "#FAFAFA",
-    secondary: "#F5F5F5",
-    secondaryForeground: "#171717",
-    muted: "#F5F5F5",
-    mutedForeground: "#737373",
-    accent: "#F5F5F5",
-    accentForeground: "#171717",
-    destructive: "#EF4444",
-    destructiveForeground: "#FAFAFA",
-    input: "#E5E5E5",
-    ring: "#1f1501",
+    // Custom colors - Clean neutral palette
+    foreground: "#2D2D2D", // Consistent darker text
+    cardForeground: "#2D2D2D",
+    popover: "#F8F8F8", // Clean light background for popovers
+    tag: "#B8A9F5", // Muted purple tag
+    popoverForeground: "#2D2D2D",
+    primaryForeground: "#F5F5F5", // Clean light foreground
+    secondary: "#ECECEC", // Neutral secondary background
+    secondaryForeground: "#3A3A3A",
+    muted: "#E5E5E5", // Clean muted background
+    mutedForeground: "#6B6B6B", // Good contrast muted text
+    accent: "#ECECEC", // Matches secondary
+    accentForeground: "#3A3A3A",
+    destructive: "#B91C1C", // Consistent with notification
+    destructiveForeground: "#F5F5F5", // Clean foreground
+    input: "#F0F0F0", // Neutral input background
+    ring: "#4A4A4A", // Darker focus ring
     radius: "0.5rem",
+
+    // Chart colors - slightly muted versions
     chart1: "#E85D45",
     chart2: "#2AA79B",
     chart3: "#2E4756",
@@ -160,7 +162,7 @@ export const lightTheme: CustomTheme = {
     chart5: "#F57C36",
     tsprimary: "#4b99de",
     tssecondary: "#5fb94a",
-    myblack: "#1f1501",
+    myblack: "#2D2D2D", // Clean neutral dark
   },
   ...OTHER,
 };

@@ -169,7 +169,7 @@ const madeStyles = makeStyles((theme) => {
       height: theme.vh(7),
       marginTop: theme.vh(4),
       borderRadius: theme.vw(10),
-      backgroundColor: theme.colors.background,
+      backgroundColor: theme.colors.tag,
     },
   });
 });

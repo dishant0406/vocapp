@@ -135,7 +135,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={theme}>
-      <StatusBar style="light" />
+      <StatusBar style="auto" />
       <GestureHandlerRootView
         style={{
           flex: 1,
